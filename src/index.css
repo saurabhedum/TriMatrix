@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* Make all scrollbars transparent globally */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+@theme {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+}
+
+@layer base {
+  :root, .theme-1 { --bg-base: #0a0a0a; --bg-surface: #171717; --primary: #d4af37; --primary-hover: #b5952f; --text-main: #f5f5f5; --text-muted: #a3a3a3; } /* Obsidian & Gold */
+  .theme-2 { --bg-base: #0f172a; --bg-surface: #1e293b; --primary: #e2e8f0; --primary-hover: #cbd5e1; --text-main: #f8fafc; --text-muted: #94a3b8; } /* Midnight & Silver */
+  .theme-3 { --bg-base: #111827; --bg-surface: #1f2937; --primary: #10b981; --primary-hover: #059669; --text-main: #f9fafb; --text-muted: #9ca3af; } /* Charcoal & Emerald */
+  .theme-4 { --bg-base: #020617; --bg-surface: #0f172a; --primary: #3b82f6; --primary-hover: #2563eb; --text-main: #f8fafc; --text-muted: #94a3b8; } /* Dark Slate & Sapphire */
+  .theme-5 { --bg-base: #1c1917; --bg-surface: #292524; --primary: #cd7f32; --primary-hover: #a66321; --text-main: #fafaf9; --text-muted: #a8a29e; } /* Espresso & Bronze */
+  .theme-6 { --bg-base: #18181b; --bg-surface: #27272a; --primary: #e11d48; --primary-hover: #be123c; --text-main: #fafafa; --text-muted: #a1a1aa; } /* Gunmetal & Crimson */
+  .theme-7 { --bg-base: #09090b; --bg-surface: #18181b; --primary: #e4e4e7; --primary-hover: #d4d4d8; --text-main: #ffffff; --text-muted: #a1a1aa; } /* Onyx & Platinum */
+  .theme-8 { --bg-base: #172554; --bg-surface: #1e3a8a; --primary: #b45309; --primary-hover: #92400e; --text-main: #eff6ff; --text-muted: #bfdbfe; } /* Navy & Rose Gold */
+  .theme-9 { --bg-base: #022c22; --bg-surface: #064e3b; --primary: #6ee7b7; --primary-hover: #34d399; --text-main: #ecfdf5; --text-muted: #a7f3d0; } /* Deep Forest & Mint */
+  .theme-10 { --bg-base: #0a0a0a; --bg-surface: #171717; --primary: #06b6d4; --primary-hover: #0891b2; --text-main: #fafafa; --text-muted: #a3a3a3; } /* Carbon & Cyan */
+  .theme-11 { --bg-base: #2e1065; --bg-surface: #4c1d95; --primary: #d8b4fe; --primary-hover: #c084fc; --text-main: #faf5ff; --text-muted: #e9d5ff; } /* Dark Amethyst & Lilac */
+  .theme-12 { --bg-base: #000000; --bg-surface: #111111; --primary: #fef3c7; --primary-hover: #fde68a; --text-main: #ffffff; --text-muted: #a3a3a3; } /* Matte Black & Ivory */
+  .theme-13 { --bg-base: #334155; --bg-surface: #475569; --primary: #f59e0b; --primary-hover: #d97706; --text-main: #f8fafc; --text-muted: #cbd5e1; } /* Slate Gray & Amber */
+  .theme-14 { --bg-base: #042f2e; --bg-surface: #115e59; --primary: #fb923c; --primary-hover: #f97316; --text-main: #f0fdfa; --text-muted: #99f6e4; } /* Dark Teal & Coral */
+  .theme-15 { --bg-base: #1e1b4b; --bg-surface: #312e81; --primary: #fbbf24; --primary-hover: #f59e0b; --text-main: #eef2ff; --text-muted: #c7d2fe; } /* Midnight Purple & Gold */
+  .theme-16 { --bg-base: #27272a; --bg-surface: #3f3f46; --primary: #3b82f6; --primary-hover: #2563eb; --text-main: #fafafa; --text-muted: #d4d4d8; } /* Iron & Cobalt */
+  .theme-17 { --bg-base: #4a044e; --bg-surface: #701a75; --primary: #fbcfe8; --primary-hover: #f9a8d4; --text-main: #fdf4ff; --text-muted: #fae8ff; } /* Deep Maroon & Blush */
+  .theme-18 { --bg-base: #050505; --bg-surface: #171717; --primary: #9f1239; --primary-hover: #881337; --text-main: #fafafa; --text-muted: #a3a3a3; } /* Obsidian & Ruby */
+  .theme-19 { --bg-base: #14532d; --bg-surface: #166534; --primary: #fde047; --primary-hover: #facc15; --text-main: #f0fdf4; --text-muted: #bbf7d0; } /* Dark Olive & Sand */
+  .theme-20 { --bg-base: #000000; --bg-surface: #0a0a0a; --primary: #ffffff; --primary-hover: #e5e5e5; --text-main: #ffffff; --text-muted: #737373; } /* Pure Black & White */
+}
+
+@layer utilities {
+  .glassy-neumorphic {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      -4px -4px 10px rgba(255, 255, 255, 0.02),
+      4px 4px 10px rgba(0, 0, 0, 0.4),
+      inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+  }
+  .glassy-neumorphic:active {
+    box-shadow: 
+      inset -4px -4px 10px rgba(255, 255, 255, 0.02),
+      inset 4px 4px 10px rgba(0, 0, 0, 0.4);
+  }
+  .glassy-panel {
+    background: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .bg-theme-base { background-color: var(--bg-base); }
+  .bg-theme-surface { background-color: var(--bg-surface); }
+  .text-theme-main { color: var(--text-main); }
+  .text-theme-muted { color: var(--text-muted); }
+  .text-theme-primary { color: var(--primary); }
+  .bg-theme-primary { background-color: var(--primary); }
+  .border-theme-primary { border-color: var(--primary); }
+  .hover\:bg-theme-primary-hover:hover { background-color: var(--primary-hover); }
+}

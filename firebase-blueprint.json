@@ -1,0 +1,260 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the TriMatrix application.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The user's unique ID." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "role": { "type": "string", "enum": ["admin", "user"], "description": "The user's role." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user was created." }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Workflow": {
+      "title": "Workflow",
+      "description": "A saved workflow configuration.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The workflow's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this workflow." },
+        "name": { "type": "string", "description": "The name of the workflow." },
+        "nodes": { "type": "string", "description": "JSON stringified array of nodes." },
+        "edges": { "type": "string", "description": "JSON stringified array of edges." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the workflow was created." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "When the workflow was last updated." }
+      },
+      "required": ["id", "uid", "name", "nodes", "edges", "createdAt", "updatedAt"]
+    },
+    "DynamicVariable": {
+      "title": "DynamicVariable",
+      "description": "A dynamic variable used in workflows and SEO.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The variable's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this variable." },
+        "key": { "type": "string", "description": "The variable key (e.g., {{keyword}})." },
+        "value": { "type": "string", "description": "The variable value." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the variable was created." }
+      },
+      "required": ["id", "uid", "key", "value", "createdAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A marketing project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The project's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this project." },
+        "name": { "type": "string", "description": "The name of the project." },
+        "client": { "type": "string", "description": "The client name." },
+        "progress": { "type": "number", "description": "Project progress percentage." },
+        "status": { "type": "string", "description": "Project status." },
+        "deadline": { "type": "string", "description": "Project deadline." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the project was created." }
+      },
+      "required": ["id", "uid", "name", "client", "progress", "status", "deadline", "createdAt"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "A recent activity or log.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The activity's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this activity." },
+        "user": { "type": "string", "description": "The user who performed the action." },
+        "action": { "type": "string", "description": "The action performed." },
+        "project": { "type": "string", "description": "The project related to the action." },
+        "time": { "type": "string", "description": "Time string or timestamp." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the activity was created." }
+      },
+      "required": ["id", "uid", "user", "action", "project", "time", "createdAt"]
+    },
+    "SocialPost": {
+      "title": "SocialPost",
+      "description": "A social media post.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The post's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this post." },
+        "platform": { "type": "string", "description": "The social media platform." },
+        "status": { "type": "string", "description": "The post status (Published, Scheduled, Draft)." },
+        "content": { "type": "string", "description": "The content of the post." },
+        "scheduledFor": { "type": "string", "description": "When the post is scheduled for." },
+        "engagement": { "type": "string", "description": "JSON stringified engagement metrics." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the post was created." }
+      },
+      "required": ["id", "uid", "platform", "status", "content", "createdAt"]
+    },
+    "SeoStrategy": {
+      "title": "SeoStrategy",
+      "description": "An SEO strategy.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The strategy's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this strategy." },
+        "name": { "type": "string", "description": "The name of the strategy." },
+        "steps": { "type": "string", "description": "JSON stringified array of steps." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the strategy was created." }
+      },
+      "required": ["id", "uid", "name", "steps", "createdAt"]
+    },
+    "AutomationRule": {
+      "title": "AutomationRule",
+      "description": "An automation rule.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The rule's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this rule." },
+        "name": { "type": "string", "description": "The name of the rule." },
+        "type": { "type": "string", "description": "The type of the rule." },
+        "trigger": { "type": "string", "description": "The trigger condition." },
+        "status": { "type": "string", "description": "The status of the rule." },
+        "service": { "type": "string", "description": "The service related to the rule." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the rule was created." }
+      },
+      "required": ["id", "uid", "name", "type", "trigger", "status", "service", "createdAt"]
+    },
+    "AIChatMessage": {
+      "title": "AIChatMessage",
+      "description": "A chat message in the AI assistant.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The message's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this chat." },
+        "role": { "type": "string", "description": "The role of the message sender." },
+        "text": { "type": "string", "description": "The message text." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the message was created." }
+      },
+      "required": ["id", "uid", "role", "text", "createdAt"]
+    },
+    "PerformanceAlert": {
+      "title": "PerformanceAlert",
+      "description": "A performance alert.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The alert's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this alert." },
+        "title": { "type": "string", "description": "The title of the alert." },
+        "issue": { "type": "string", "description": "The issue description." },
+        "action": { "type": "string", "description": "The recommended action." },
+        "status": { "type": "string", "description": "The status of the alert." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the alert was created." }
+      },
+      "required": ["id", "uid", "title", "issue", "action", "status", "createdAt"]
+    },
+    "PerformanceLog": {
+      "title": "PerformanceLog",
+      "description": "A performance log entry.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The ID of the user who owns this log." },
+        "text": { "type": "string", "description": "The log message." },
+        "type": { "type": "string", "description": "The type of the log." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the log was created." }
+      },
+      "required": ["uid", "text", "type", "createdAt"]
+    },
+    "GeneratedContent": {
+      "title": "GeneratedContent",
+      "description": "Generated content from AI.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The ID of the user who owns this." },
+        "projectId": { "type": "string", "description": "The project ID." },
+        "topic": { "type": "string", "description": "The topic." },
+        "content": { "type": "string", "description": "The content." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the content was created." }
+      },
+      "required": ["uid", "topic", "content", "createdAt"]
+    },
+    "Summary": {
+      "title": "Summary",
+      "description": "A summary generated by AI.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The ID of the user who owns this." },
+        "projectId": { "type": "string", "description": "The project ID." },
+        "text": { "type": "string", "description": "The summary text." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the summary was created." }
+      },
+      "required": ["uid", "text", "createdAt"]
+    },
+    "MagicResult": {
+      "title": "MagicResult",
+      "description": "Result of a magic tool action.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The result's unique ID." },
+        "uid": { "type": "string", "description": "The ID of the user who owns this result." },
+        "content": { "type": "string", "description": "The result content." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the result was created." }
+      },
+      "required": ["id", "uid", "content", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles and roles."
+    },
+    "/workflows/{workflowId}": {
+      "schema": { "$ref": "#/entities/Workflow" },
+      "description": "Stores saved workflows."
+    },
+    "/dynamicVariables/{variableId}": {
+      "schema": { "$ref": "#/entities/DynamicVariable" },
+      "description": "Stores dynamic variables."
+    },
+    "/projects/{projectId}/socialPosts/{postId}": {
+      "schema": { "$ref": "#/entities/SocialPost" },
+      "description": "Stores social media posts for a project."
+    },
+    "/projects/{projectId}/generatedContent/{contentId}": {
+      "schema": { "$ref": "#/entities/GeneratedContent" },
+      "description": "Stores AI generated content for a project."
+    },
+    "/projects/{projectId}/summaries/{summaryId}": {
+      "schema": { "$ref": "#/entities/Summary" },
+      "description": "Stores AI generated summaries for a project."
+    },
+    "/projects/{projectId}/magicResults/{resultId}": {
+      "schema": { "$ref": "#/entities/MagicResult" },
+      "description": "Stores magic tool results for a project."
+    },
+    "/projects/{projectId}/analytics/{docId}": {
+      "schema": { "$ref": "#/entities/Analytics" },
+      "description": "Stores analytics data for a project."
+    },
+    "/projects/{projectId}/performanceAlerts/{alertId}": {
+      "schema": { "$ref": "#/entities/PerformanceAlert" },
+      "description": "Stores performance alerts for a project."
+    },
+    "/projects/{projectId}/performanceLogs/{logId}": {
+      "schema": { "$ref": "#/entities/PerformanceLog" },
+      "description": "Stores performance logs for a project."
+    },
+    "/projects/{projectId}/automationRules/{ruleId}": {
+      "schema": { "$ref": "#/entities/AutomationRule" },
+      "description": "Stores automation rules for a project."
+    },
+    "/projects/{projectId}/workflows/{workflowId}": {
+      "schema": { "$ref": "#/entities/Workflow" },
+      "description": "Stores saved workflows for a project."
+    },
+    "/projects/{projectId}/dynamicVariables/{variableId}": {
+      "schema": { "$ref": "#/entities/DynamicVariable" },
+      "description": "Stores dynamic variables for a project."
+    },
+    "/projects/{projectId}/aiChatMessages/{messageId}": {
+      "schema": { "$ref": "#/entities/AIChatMessage" },
+      "description": "Stores AI chat messages for a project."
+    },
+    "/seoStrategies/{strategyId}": {
+      "schema": { "$ref": "#/entities/SeoStrategy" },
+      "description": "Stores SEO strategies (Universal)."
+    }
+  }
+}
