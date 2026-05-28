@@ -9,12 +9,6 @@ import { useProjects } from '../context/ProjectContext';
 import { GoogleGenAI } from '@google/genai';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-const MOCK_POSTS = [
-  { id: 1, platform: 'Twitter', status: 'Published', content: 'Just launched our new AI marketing suite! 🚀 Check it out at trimatrix.ai', scheduledFor: new Date().toISOString(), engagement: { likes: 124, retweets: 45, comments: 12 } },
-  { id: 2, platform: 'LinkedIn', status: 'Scheduled', content: 'How predictive analytics is changing the B2B landscape. Read our latest case study.', scheduledFor: new Date(Date.now() + 86400000).toISOString() },
-  { id: 3, platform: 'Instagram', status: 'Draft', content: 'Behind the scenes at TriMatrix HQ. 📸', scheduledFor: null },
-];
-
 const PLATFORMS = [
   { id: 'social_twitter', name: 'X (Twitter)', connected: false, color: 'bg-sky-500', short: 'X' },
   { id: 'social_linkedin', name: 'LinkedIn', connected: false, color: 'bg-blue-600', short: 'in' },
@@ -31,7 +25,7 @@ const PLATFORMS = [
 export default function SocialMedia() {
   const { user, isAuthReady } = useAuth();
   const { activeProject } = useProjects();
-  const [posts, setPosts] = useState<any[]>(MOCK_POSTS);
+  const [posts, setPosts] = useState<any[]>([]);
   const [hashtags, setHashtags] = useState(['MarketingAI', 'Automation', 'GrowthHacking', 'SEO']);
   const [newHashtag, setNewHashtag] = useState('');
   const [platforms, setPlatforms] = useState(PLATFORMS);

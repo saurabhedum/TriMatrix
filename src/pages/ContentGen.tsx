@@ -141,7 +141,17 @@ export default function ContentGen() {
       }
     } catch (err: any) {
       console.error("Gemini failed:", err);
-      setError(err.message || "Content generation failed.");
+      let errorMessage = "Content generation failed.";
+      if (err.message && err.message.toLowerCase().includes("api key") || err.status === 401 || err.status === 403) {
+        errorMessage = "Invalid API Key. Please update your AI API key in Settings.";
+      } else if (err.message && err.message.toLowerCase().includes("quota") || err.status === 429) {
+        errorMessage = "Rate limit or quota exceeded. Please try again later.";
+      } else if (err.message && (err.message.toLowerCase().includes("network") || err.message.toLowerCase().includes("fetch"))) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = `API Error: ${err.message}`;
+      }
+      setError(errorMessage);
       setLoading(false);
       return;
     }
@@ -199,7 +209,17 @@ export default function ContentGen() {
       }
     } catch (err: any) {
       console.error("Gemini summary failed:", err);
-      setError(err.message || "Summary generation failed.");
+      let errorMessage = "Summary generation failed.";
+      if (err.message && err.message.toLowerCase().includes("api key") || err.status === 401 || err.status === 403) {
+        errorMessage = "Invalid API Key. Please update your AI API key in Settings.";
+      } else if (err.message && err.message.toLowerCase().includes("quota") || err.status === 429) {
+        errorMessage = "Rate limit or quota exceeded. Please try again later.";
+      } else if (err.message && (err.message.toLowerCase().includes("network") || err.message.toLowerCase().includes("fetch"))) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = `API Error: ${err.message}`;
+      }
+      setError(errorMessage);
     }
 
     setSummary(summaryText);

@@ -667,10 +667,46 @@ function WorkflowBuilder() {
       let output = {};
       let log = `Executing ${node.data.label}...\nTimestamp: ${new Date().toISOString()}`;
       
+      const replaceVariables = (text: string) => {
+        if (!text) return text;
+        let processed = text;
+        const matches = processed.match(/{{([^}]+)}}/g);
+        if (matches) {
+          matches.forEach(match => {
+            const varName = match.replace(/[{}]/g, '').trim();
+            if (varName.endsWith('.output')) {
+              const nodeId = varName.replace('.output', '');
+              const out = nodeOutputs.get(nodeId);
+              if (out) {
+                let val = '';
+                if (typeof out === 'object') {
+                  val = Object.values(out)[0] as string; // take first value
+                  if (Array.isArray(val)) {
+                    val = val.join(', ');
+                  } else if (typeof val === 'object') {
+                    val = JSON.stringify(val);
+                  }
+                } else {
+                  val = String(out);
+                }
+                processed = processed.replace(match, val);
+              }
+            } else {
+              const dynVar = dynamicVariables.find((v: any) => v.key.replace(/[{}]/g, '') === varName);
+              if (dynVar) {
+                processed = processed.replace(match, dynVar.value || '');
+              }
+            }
+          });
+        }
+        return processed;
+      };
+      
       try {
         // Core logic for specific nodes
         if (node.data.label === 'Fetch Keywords') {
-          const topic = (node.data as any).config?.topic || 'digital marketing';
+          const rawTopic = (node.data as any).config?.topic || 'digital marketing';
+          const topic = replaceVariables(rawTopic);
           
           if (ai) {
             log += `\n\nCalling Gemini API for topic: ${topic}...`;
@@ -703,43 +739,35 @@ function WorkflowBuilder() {
           });
           
           const tone = (node.data as any).config?.tone || 'professional';
+          const rawTopic = (node.data as any).config?.topic || '';
+          const topic = replaceVariables(rawTopic);
           
-          if (ai && inputKeywords.length > 0) {
-            log += `\n\nCalling Gemini API to generate blog with tone: ${tone} and keywords: ${inputKeywords.join(', ')}...`;
+          const prompt = topic 
+            ? `Write a short, engaging blog post introduction (about 100 words) with a ${tone} tone about "${topic}"${inputKeywords.length > 0 ? `, incorporating the following keywords: ${inputKeywords.join(', ')}` : ''}.`
+            : `Write a short, engaging blog post introduction (about 100 words) with a ${tone} tone${inputKeywords.length > 0 ? `, incorporating the following keywords: ${inputKeywords.join(', ')}` : ''}.`;
+            
+          if (ai) {
+            log += `\n\nCalling Gemini API to generate blog with tone: ${tone}...`;
             updateNodeStatus(currentId, 'running', log);
             
             const response = await ai.models.generateContent({
               model: "gemini-3-flash-preview",
-              contents: `Write a short, engaging blog post introduction (about 100 words) with a ${tone} tone, incorporating the following keywords: ${inputKeywords.join(', ')}.`,
+              contents: prompt,
             });
             output = { blogContent: response.text };
-            log += `\n\nInput Configuration:\nTone: ${tone}\n\nInput received: ${JSON.stringify({ keywords: inputKeywords })}\n\nOutput:\n${response.text}`;
-          } else if (ai) {
-            log += `\n\nCalling Gemini API to generate generic blog with tone: ${tone}...`;
-            updateNodeStatus(currentId, 'running', log);
-            
-            const response = await ai.models.generateContent({
-              model: "gemini-3-flash-preview",
-              contents: `Write a short, engaging blog post introduction (about 100 words) with a ${tone} tone.`,
-            });
-            output = { blogContent: response.text };
-            log += `\n\nWarning: No keywords received from upstream nodes.\n\nInput Configuration:\nTone: ${tone}\n\nOutput:\n${response.text}`;
+            log += `\n\nInput Configuration:\nTone: ${tone}\nTopic: ${topic}\n\nInput received: ${JSON.stringify({ keywords: inputKeywords })}\n\nOutput:\n${response.text}`;
           } else {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            if (inputKeywords.length > 0) {
-              output = { blogContent: `Generated ${tone} blog post focusing on: ${inputKeywords.join(', ')}...` };
-              log += `\n\nInput Configuration:\nTone: ${tone}\n\nInput received: ${JSON.stringify({ keywords: inputKeywords })}\n\nOutput (Simulated):\nGenerated blog using keywords. Content preview: ${(output as any).blogContent}`;
-            } else {
-              output = { blogContent: `Generated generic ${tone} blog post...` };
-              log += `\n\nWarning: No keywords received from upstream nodes.\n\nOutput (Simulated):\nGenerated generic blog post.`;
-            }
+            output = { blogContent: `Generated ${tone} blog post...` };
+            log += `\n\nInput Configuration:\nTone: ${tone}\nTopic: ${topic}\n\nOutput (Simulated):\nGenerated blog.`;
           }
         } else if (node.data.label === 'Send Email') {
           await new Promise(resolve => setTimeout(resolve, 1000));
-          const recipient = (node.data as any).config?.recipient || 'No recipient specified';
-          const subject = (node.data as any).config?.subject || 'No subject specified';
-          output = { status: 'sent', recipient, subject };
-          log += `\n\nInput Configuration:\nRecipient: ${recipient}\nSubject: ${subject}\n\nOutput (Simulated):\nEmail sent successfully.`;
+          const recipient = replaceVariables((node.data as any).config?.recipient || 'No recipient specified');
+          const subject = replaceVariables((node.data as any).config?.subject || 'No subject specified');
+          const body = replaceVariables((node.data as any).config?.body || 'No body specified');
+          output = { status: 'sent', recipient, subject, body };
+          log += `\n\nInput Configuration:\nRecipient: ${recipient}\nSubject: ${subject}\nBody:\n${body}\n\nOutput (Simulated):\nEmail sent successfully.`;
         } else {
           await new Promise(resolve => setTimeout(resolve, 1000));
           log += `\n\nGeneric execution completed.`;
@@ -1225,8 +1253,12 @@ function WorkflowBuilder() {
                   </div>
                   {selectedNode.data.label === 'Fetch Keywords' && (
                     <div>
-                      <div className="flex justify-between items-center mb-1">
+                      <div className="flex justify-between items-center mb-1 group relative">
                         <label className="block text-sm font-medium text-slate-300">Topic</label>
+                        <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                        <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                          Enter the topic to fetch keywords for. You can insert dynamic variables (e.g., {'{{projectName}}'}) or upstream outputs.
+                        </div>
                         <VariableInserter 
                           onInsert={(v: string) => insertVariable('topic', v)} 
                           upstreamNodes={upstreamNodes} 
@@ -1244,26 +1276,58 @@ function WorkflowBuilder() {
                   )}
                   
                   {selectedNode.data.label === 'Generate Blog' && (
-                    <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Tone</label>
-                      <select 
-                        value={selectedNode.data.config?.tone || 'professional'}
-                        onChange={e => updateNodeConfig('tone', e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                      >
-                        <option value="professional">Professional</option>
-                        <option value="casual">Casual</option>
-                        <option value="humorous">Humorous</option>
-                        <option value="informative">Informative</option>
-                      </select>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-1 group relative">
+                          <label className="block text-sm font-medium text-slate-300">Topic / Instructions</label>
+                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                            Provide the topic or instructions to generate the blog. You can use dynamic variables here.
+                          </div>
+                          <VariableInserter 
+                            onInsert={(v: string) => insertVariable('topic', v)} 
+                            upstreamNodes={upstreamNodes} 
+                            dynamicVariables={dynamicVariables} 
+                          />
+                        </div>
+                        <textarea 
+                          value={selectedNode.data.config?.topic || ''}
+                          onChange={e => updateNodeConfig('topic', e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 h-20 resize-none text-sm"
+                          placeholder="What should the blog be about?"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-300 mb-1 group relative flex items-center">
+                          Tone
+                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                            Select the stylistic tone for the generated blog post.
+                          </div>
+                        </label>
+                        <select 
+                          value={selectedNode.data.config?.tone || 'professional'}
+                          onChange={e => updateNodeConfig('tone', e.target.value)}
+                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
+                        >
+                          <option value="professional">Professional</option>
+                          <option value="casual">Casual</option>
+                          <option value="humorous">Humorous</option>
+                          <option value="informative">Informative</option>
+                        </select>
+                      </div>
                     </div>
                   )}
                   
                   {selectedNode.data.label === 'Send Email' && (
                     <>
                       <div>
-                        <div className="flex justify-between items-center mb-1">
+                        <div className="flex justify-between items-center mb-1 group relative">
                           <label className="block text-sm font-medium text-slate-300">Recipient</label>
+                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                            Email address of the recipient. Insert variables to send to dynamic recipients.
+                          </div>
                           <VariableInserter 
                             onInsert={(v: string) => insertVariable('recipient', v)} 
                             upstreamNodes={upstreamNodes} 
@@ -1279,8 +1343,12 @@ function WorkflowBuilder() {
                         />
                       </div>
                       <div>
-                        <div className="flex justify-between items-center mb-1">
+                        <div className="flex justify-between items-center mb-1 group relative">
                           <label className="block text-sm font-medium text-slate-300">Subject</label>
+                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                            Subject line for the email. Dynamic variables are supported.
+                          </div>
                           <VariableInserter 
                             onInsert={(v: string) => insertVariable('subject', v)} 
                             upstreamNodes={upstreamNodes} 
@@ -1296,8 +1364,12 @@ function WorkflowBuilder() {
                         />
                       </div>
                       <div>
-                        <div className="flex justify-between items-center mb-1">
+                        <div className="flex justify-between items-center mb-1 group relative">
                           <label className="block text-sm font-medium text-slate-300">Body</label>
+                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
+                          <div className="absolute bottom-6 right-0 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
+                            Contents of the email. You can insert variables directly into the body.
+                          </div>
                           <VariableInserter 
                             onInsert={(v: string) => insertVariable('body', v)} 
                             upstreamNodes={upstreamNodes} 

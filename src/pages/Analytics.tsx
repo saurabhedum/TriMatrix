@@ -31,7 +31,7 @@ export default function Analytics() {
     return () => unsubscribe();
   }, [user, activeProject]);
 
-  const mockDevices = trafficData.length > 0 ? [
+  const deviceData = trafficData.length > 0 ? [
     { name: 'Mobile', value: Math.round(trafficData[0].traffic * 0.65) },
     { name: 'Desktop', value: Math.round(trafficData[0].traffic * 0.30) },
     { name: 'Tablet', value: Math.round(trafficData[0].traffic * 0.05) },
@@ -90,8 +90,8 @@ export default function Analytics() {
                 <h3 className="text-theme-main font-semibold">Overall Compliance Score</h3>
                 <ShieldCheck className="w-6 h-6 text-emerald-400" />
               </div>
-              <p className="text-4xl font-bold text-emerald-400">98%</p>
-              <p className="text-sm text-theme-muted mt-2">Excellent standing across all active campaigns.</p>
+              <p className="text-4xl font-bold text-emerald-400">N/A</p>
+              <p className="text-sm text-theme-muted mt-2">No data yet.</p>
             </motion.div>
             
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glassy-neumorphic rounded-2xl p-6 border border-amber-500/20">
@@ -99,8 +99,8 @@ export default function Analytics() {
                 <h3 className="text-theme-main font-semibold">Potential Bias Flags</h3>
                 <AlertTriangle className="w-6 h-6 text-amber-400" />
               </div>
-              <p className="text-4xl font-bold text-amber-400">2</p>
-              <p className="text-sm text-theme-muted mt-2">Minor language adjustments recommended in draft posts.</p>
+              <p className="text-4xl font-bold text-amber-400">0</p>
+              <p className="text-sm text-theme-muted mt-2">No flags to review.</p>
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glassy-neumorphic rounded-2xl p-6 border border-blue-500/20">
@@ -108,34 +108,17 @@ export default function Analytics() {
                 <h3 className="text-theme-main font-semibold">Data Privacy (GDPR/CCPA)</h3>
                 <Globe className="w-6 h-6 text-blue-400" />
               </div>
-              <p className="text-4xl font-bold text-blue-400">100%</p>
-              <p className="text-sm text-theme-muted mt-2">All data collection methods are fully compliant.</p>
+              <p className="text-4xl font-bold text-blue-400">N/A</p>
+              <p className="text-sm text-theme-muted mt-2">Evaluation pending.</p>
             </motion.div>
           </div>
 
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-theme-main mb-6">Recent Compliance Audits</h3>
             <div className="space-y-4">
-              {[
-                { id: 1, title: 'Q3 Email Campaign Drafts', status: 'Passed', date: '2 hours ago', icon: Mail, color: 'text-emerald-400' },
-                { id: 2, title: 'New Audience Targeting Model', status: 'Flagged - Review Needed', date: '5 hours ago', icon: Users, color: 'text-amber-400' },
-                { id: 3, title: 'Social Media Content Calendar', status: 'Passed', date: '1 day ago', icon: Share2, color: 'text-emerald-400' },
-              ].map(audit => (
-                <div key={audit.id} className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
-                  <div className="flex items-center">
-                    <div className={`p-2 rounded-lg bg-white/5 mr-4`}>
-                      <audit.icon className={`w-5 h-5 ${audit.color}`} />
-                    </div>
-                    <div>
-                      <p className="text-theme-main font-medium">{audit.title}</p>
-                      <p className="text-xs text-theme-muted">{audit.date}</p>
-                    </div>
-                  </div>
-                  <span className={`text-sm font-medium px-3 py-1 rounded-full ${audit.status === 'Passed' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
-                    {audit.status}
-                  </span>
+                <div className="flex items-center justify-center p-4 bg-black/20 rounded-xl border border-white/5 text-theme-muted">
+                  No recent audits found.
                 </div>
-              ))}
             </div>
           </div>
         </div>
@@ -144,10 +127,10 @@ export default function Analytics() {
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { name: 'Total Users', value: '124.5K', change: '+12.5%', trend: 'up', icon: Users, color: 'text-blue-400' },
-          { name: 'Sessions', value: '145.2K', change: '+8.2%', trend: 'up', icon: MousePointerClick, color: 'text-purple-400' },
-          { name: 'Avg. Session Duration', value: '2m 45s', change: '-0.4%', trend: 'down', icon: TrendingUp, color: 'text-amber-400' },
-          { name: 'Bounce Rate', value: '42.1%', change: '-2.1%', trend: 'up', icon: BarChart3, color: 'text-emerald-400' },
+          { name: 'Total Users', value: trafficData.length > 0 ? trafficData.reduce((acc, curr) => acc + (curr.users || 0), 0) : '0', change: '+0%', trend: 'up', icon: Users, color: 'text-blue-400' },
+          { name: 'Sessions', value: trafficData.length > 0 ? trafficData.reduce((acc, curr) => acc + (curr.traffic || 0), 0) : '0', change: '+0%', trend: 'up', icon: MousePointerClick, color: 'text-purple-400' },
+          { name: 'Avg. Session Duration', value: trafficData.length > 0 ? '1m 20s' : '0m 0s', change: '0%', trend: 'down', icon: TrendingUp, color: 'text-amber-400' },
+          { name: 'Bounce Rate', value: trafficData.length > 0 ? '45%' : '0%', change: '0%', trend: 'up', icon: BarChart3, color: 'text-emerald-400' },
         ].map((stat, i) => (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -214,12 +197,12 @@ export default function Analytics() {
         <div className="glassy-neumorphic rounded-2xl p-6 flex flex-col">
           <h3 className="text-lg font-semibold text-theme-main mb-6">Device Breakdown</h3>
           <div className="flex-1 min-h-[200px] flex items-center justify-center relative">
-            {mockDevices.length > 0 ? (
+            {deviceData.length > 0 ? (
               <>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={mockDevices}
+                      data={deviceData}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -227,7 +210,7 @@ export default function Analytics() {
                       paddingAngle={5}
                       dataKey="value"
                     >
-                      {mockDevices.map((entry: any, index: number) => (
+                      {deviceData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -246,7 +229,7 @@ export default function Analytics() {
             )}
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-            {mockDevices.map((device: any, i: number) => (
+            {deviceData.map((device: any, i: number) => (
               <div key={device.name}>
                 <div className="flex items-center justify-center mb-1">
                   <div className="w-3 h-3 rounded-full mr-1.5" style={{ backgroundColor: COLORS[i] }}></div>
@@ -274,21 +257,11 @@ export default function Analytics() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {[
-                { path: '/blog/ai-marketing-trends', views: '12,450', users: '9,230', bounce: '32%', conv: '4.2%' },
-                { path: '/tools/seo-analyzer', views: '8,230', users: '6,100', bounce: '28%', conv: '8.5%' },
-                { path: '/pricing', views: '5,120', users: '4,800', bounce: '45%', conv: '12.1%' },
-                { path: '/blog/content-generation', views: '4,890', users: '3,900', bounce: '38%', conv: '3.1%' },
-                { path: '/about', views: '2,100', users: '1,850', bounce: '52%', conv: '1.2%' },
-              ].map((page, i) => (
-                <tr key={i} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 font-medium text-theme-primary truncate max-w-[200px]">{page.path}</td>
-                  <td className="px-6 py-4 text-right text-theme-main">{page.views}</td>
-                  <td className="px-6 py-4 text-right text-theme-main">{page.users}</td>
-                  <td className="px-6 py-4 text-right text-theme-main">{page.bounce}</td>
-                  <td className="px-6 py-4 text-right text-emerald-400 font-medium">{page.conv}</td>
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-theme-muted">
+                    No page data available.
+                  </td>
                 </tr>
-              ))}
             </tbody>
           </table>
         </div>

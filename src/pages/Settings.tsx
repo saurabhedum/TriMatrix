@@ -39,6 +39,63 @@ export default function Settings() {
   const [newKeyDesc, setNewKeyDesc] = useState('');
   const [isAddingKey, setIsAddingKey] = useState(false);
 
+  // API Tester State
+  const [testUrl, setTestUrl] = useState('');
+  const [testMethod, setTestMethod] = useState('GET');
+  const [testHeaders, setTestHeaders] = useState('{\n  "Content-Type": "application/json"\n}');
+  const [testBody, setTestBody] = useState('{}');
+  const [testResult, setTestResult] = useState<any>(null);
+  const [isTestingApi, setIsTestingApi] = useState(false);
+
+  const testCustomApi = async () => {
+    setIsTestingApi(true);
+    setTestResult(null);
+    try {
+      let parsedHeaders = {};
+      try {
+        if (testHeaders.trim()) parsedHeaders = JSON.parse(testHeaders);
+      } catch (e) {
+        throw new Error('Invalid JSON in Headers');
+      }
+
+      const options: RequestInit = {
+        method: testMethod,
+        headers: parsedHeaders,
+      };
+
+      if (testMethod !== 'GET' && testMethod !== 'HEAD') {
+        try {
+          if (testBody.trim()) {
+            // Validate JSON but send as string
+            JSON.parse(testBody);
+            options.body = testBody;
+          }
+        } catch (e) {
+          throw new Error('Invalid JSON in Body');
+        }
+      }
+
+      const response = await fetch(testUrl, options);
+      const contentType = response.headers.get('content-type');
+      let data;
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = await response.text();
+      }
+
+      setTestResult({
+        status: response.status,
+        statusText: response.statusText,
+        data,
+      });
+    } catch (err: any) {
+      setTestResult({ error: err.message || 'Network error or CORS issue.' });
+    } finally {
+      setIsTestingApi(false);
+    }
+  };
+
   const handleApiKeyChange = (id: string, value: string) => {
     setApiKeys(apiKeys.map((k: any) => k.id === id ? { ...k, value } : k));
   };
@@ -66,6 +123,21 @@ export default function Settings() {
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [expandedPlatform, setExpandedPlatform] = useState<string | null>(null);
+  const [ga4PropertyId, setGa4PropertyId] = useState(() => {
+    return apiKeys.find((k: any) => k.id === 'google_analytics')?.value || '';
+  });
+
+  const handleSaveGa4 = () => {
+    const exists = apiKeys.find((k: any) => k.id === 'google_analytics');
+    if (exists) {
+      setApiKeys(apiKeys.map((k: any) => k.id === 'google_analytics' ? { ...k, value: ga4PropertyId } : k));
+    } else {
+      setApiKeys([...apiKeys, { id: 'google_analytics', name: 'Google Analytics 4', value: ga4PropertyId, desc: 'Used for GA4 tracking and reports.' }]);
+    }
+    setExpandedPlatform(null);
+  };
+
   const [notificationPrefs, setNotificationPrefs] = useLocalStorage('trimatrix_notification_prefs', {
     emailAlerts: true,
     inAppAlerts: true,
@@ -126,6 +198,7 @@ export default function Settings() {
         {[
           { id: 'api', name: 'API Keys', icon: Key },
           { id: 'integrations', name: 'Integrations', icon: Link },
+          { id: 'api_testing', name: 'API Testing', icon: Zap },
           { id: 'automation', name: 'Automation Controls', icon: ToggleRight },
           { id: 'notifications', name: 'Notifications', icon: Bell },
           { id: 'business', name: 'Business Profile', icon: Building2 },
@@ -242,28 +315,162 @@ export default function Settings() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {platforms.map((platform) => (
-                <div key={platform.name} className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5 hover:bg-white/5 transition-colors">
-                  <div className="flex items-center">
-                    <div className={`w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mr-4 ${platform.color}`}>
-                      <platform.icon className="w-5 h-5" />
+                <div key={platform.name} className="flex flex-col p-4 bg-black/20 rounded-xl border border-white/5 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center mr-4 ${platform.color}`}>
+                        <platform.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-theme-main">{platform.name}</h4>
+                        <span className={`text-xs font-medium ${platform.status === 'Connected' ? 'text-emerald-400' : 'text-theme-muted'}`}>
+                          {platform.status}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-theme-main">{platform.name}</h4>
-                      <span className={`text-xs font-medium ${platform.status === 'Connected' ? 'text-emerald-400' : 'text-theme-muted'}`}>
-                        {platform.status}
-                      </span>
-                    </div>
+                    <button 
+                      onClick={() => {
+                        if (platform.id === 'google_analytics') {
+                          setExpandedPlatform(expandedPlatform === platform.id ? null : platform.id);
+                        }
+                      }}
+                      className={`px-4 py-2 text-xs font-medium rounded-lg transition-all border ${
+                      platform.status === 'Connected' 
+                        ? 'bg-black/40 text-theme-muted hover:text-white border-white/10 hover:border-white/20' 
+                        : 'bg-theme-primary/10 text-theme-primary hover:bg-theme-primary/20 border-theme-primary/20'
+                    }`}>
+                      {platform.id === 'google_analytics' && expandedPlatform === platform.id 
+                        ? 'Cancel' 
+                        : platform.status === 'Connected' ? 'Manage' : 'Connect'}
+                    </button>
                   </div>
-                  <button className={`px-4 py-2 text-xs font-medium rounded-lg transition-all border ${
-                    platform.status === 'Connected' 
-                      ? 'bg-black/40 text-theme-muted hover:text-white border-white/10 hover:border-white/20' 
-                      : 'bg-theme-primary/10 text-theme-primary hover:bg-theme-primary/20 border-theme-primary/20'
-                  }`}>
-                    {platform.status === 'Connected' ? 'Manage' : 'Connect'}
-                  </button>
+                  {platform.id === 'google_analytics' && expandedPlatform === platform.id && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="mt-4 pt-4 border-t border-white/10"
+                    >
+                      <label className="block text-sm font-medium text-theme-main mb-2">GA4 Property ID</label>
+                      <div className="flex space-x-3">
+                        <input 
+                          type="text" 
+                          value={ga4PropertyId}
+                          onChange={(e) => setGa4PropertyId(e.target.value)}
+                          placeholder="e.g., 123456789"
+                          className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-theme-main focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all"
+                        />
+                        <button 
+                          onClick={handleSaveGa4}
+                          className="bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-xl transition-all shadow-lg shadow-theme-primary/20 font-medium whitespace-nowrap"
+                        >
+                          Save
+                        </button>
+                      </div>
+                      <p className="text-xs text-theme-muted mt-2">Find your Property ID in Google Analytics Admin &gt; Property Settings.</p>
+                    </motion.div>
+                  )}
                 </div>
               ))}
             </div>
+          </motion.div>
+        )}
+
+        {activeTab === 'api_testing' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <h3 className="text-xl font-semibold text-theme-main flex items-center mb-4">
+              <Zap className="w-5 h-5 mr-2 text-theme-primary" />
+              Custom API Tester
+            </h3>
+            <p className="text-sm text-theme-muted mb-6">Test your custom webhooks or third-party APIs (including WhatsApp, Twilio, etc.) live to ensure they connect perfectly to actual devices.</p>
+            
+            <div className="bg-black/20 p-6 rounded-xl border border-white/5 space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="w-full md:w-1/4">
+                  <label className="block text-sm font-medium text-theme-main mb-1">Method</label>
+                  <select 
+                    value={testMethod}
+                    onChange={(e) => setTestMethod(e.target.value)}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-theme-main focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all"
+                  >
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                  </select>
+                </div>
+                <div className="w-full md:w-3/4">
+                  <label className="block text-sm font-medium text-theme-main mb-1">Endpoint URL</label>
+                  <input
+                    type="url"
+                    value={testUrl}
+                    onChange={(e) => setTestUrl(e.target.value)}
+                    placeholder="https://api.whatsapp.com/v1/messages"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-theme-main focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-theme-main mb-1">Headers (JSON)</label>
+                <textarea
+                  value={testHeaders}
+                  onChange={(e) => setTestHeaders(e.target.value)}
+                  rows={4}
+                  className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-theme-main focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all font-mono text-sm resize-none custom-scrollbar"
+                />
+              </div>
+
+              {testMethod !== 'GET' && testMethod !== 'HEAD' && (
+                <div>
+                  <label className="block text-sm font-medium text-theme-main mb-1">Body (JSON)</label>
+                  <textarea
+                    value={testBody}
+                    onChange={(e) => setTestBody(e.target.value)}
+                    rows={6}
+                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-theme-main focus:outline-none focus:ring-2 focus:ring-theme-primary transition-all font-mono text-sm resize-none custom-scrollbar"
+                    placeholder='{"message": "Hello World"}'
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={testCustomApi}
+                  disabled={!testUrl || isTestingApi}
+                  className="bg-theme-primary hover:bg-theme-primary-hover disabled:bg-theme-muted disabled:text-gray-500 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-xl font-medium transition-colors flex items-center shadow-lg shadow-theme-primary/20"
+                >
+                  {isTestingApi ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" /> Send Request
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {testResult && (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-black/30 rounded-xl border border-white/10 p-4">
+                <h4 className="text-sm font-semibold text-theme-main mb-2">Response:</h4>
+                {testResult.error ? (
+                  <div className="text-rose-400 text-sm font-mono">{testResult.error}</div>
+                ) : (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${testResult.status >= 200 && testResult.status < 300 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                        {testResult.status} {testResult.statusText}
+                      </span>
+                    </div>
+                    <pre className="text-xs text-theme-muted font-mono overflow-x-auto custom-scrollbar p-3 bg-black/50 rounded-lg">
+                      {typeof testResult.data === 'object' ? JSON.stringify(testResult.data, null, 2) : testResult.data}
+                    </pre>
+                  </div>
+                )}
+              </motion.div>
+            )}
           </motion.div>
         )}
 

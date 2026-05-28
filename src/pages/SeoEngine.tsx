@@ -31,7 +31,7 @@ export default function SeoEngine() {
   const [aiSuggestions, setAiSuggestions] = useState<any>(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
-  const [dynamicVariables, setDynamicVariables] = useState<any[]>(DEFAULT_DYNAMIC_VARIABLES);
+  const [dynamicVariables, setDynamicVariables] = useState<any[]>([]);
   const [isManagingVariables, setIsManagingVariables] = useState(false);
   const [newVarKey, setNewVarKey] = useState('');
   const [newVarValue, setNewVarValue] = useState('');
@@ -57,8 +57,8 @@ export default function SeoEngine() {
 
   useEffect(() => {
     if (!isAuthReady || !user || !activeProject) {
-      setDynamicVariables(DEFAULT_DYNAMIC_VARIABLES);
-      setStrategies([{ id: '1', name: 'Q1 Content Cluster', steps: ['Keyword Research', 'Generate Outlines', 'Draft Content'] }]);
+      setDynamicVariables([]);
+      setStrategies([]);
       return;
     }
 
@@ -71,7 +71,7 @@ export default function SeoEngine() {
       if (vars.length > 0) {
         setDynamicVariables(vars);
       } else {
-        setDynamicVariables(DEFAULT_DYNAMIC_VARIABLES);
+        setDynamicVariables([]);
       }
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, `projects/${activeProject.id}/dynamicVariables`);
@@ -90,7 +90,7 @@ export default function SeoEngine() {
       if (strats.length > 0) {
         setStrategies(strats);
       } else {
-        setStrategies([{ id: '1', name: 'Q1 Content Cluster', steps: ['Keyword Research', 'Generate Outlines', 'Draft Content'] }]);
+        setStrategies([]);
       }
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, `projects/${activeProject.id}/seoStrategies`);
@@ -111,7 +111,8 @@ export default function SeoEngine() {
     if (!competitorDomain) return;
     setLoading(true);
     setTimeout(() => {
-      setGapKeywords([{ keyword: 'AI gap for ' + competitorDomain, volume: 5000, difficulty: 45 }]);
+      // Logic for Gap Analysis should be implemented here
+      setGapKeywords([]);
       setLoading(false);
     }, 1500);
   };
@@ -134,10 +135,6 @@ export default function SeoEngine() {
   const deleteStrategy = async (id: string) => {
     if (!user || !activeProject) return;
     try {
-      if (id === '1') {
-        setStrategies(strategies.filter(s => s.id !== id));
-        return;
-      }
       await deleteDoc(doc(db, 'projects', activeProject.id, 'seoStrategies', id));
     } catch (err) {
       handleFirestoreError(err, OperationType.DELETE, `projects/${activeProject.id}/seoStrategies/${id}`);
@@ -146,18 +143,6 @@ export default function SeoEngine() {
 
   const addStep = async (strategyId: string, content: string = newStepContent) => {
     if (!content.trim() || !user || !activeProject) return;
-    
-    if (strategyId === '1') {
-      setStrategies(strategies.map(s => {
-        if (s.id === strategyId) {
-          return { ...s, steps: [...s.steps, content] };
-        }
-        return s;
-      }));
-      setNewStepContent('');
-      setAddingStepTo(null);
-      return;
-    }
 
     try {
       const strategy = strategies.find(s => s.id === strategyId);

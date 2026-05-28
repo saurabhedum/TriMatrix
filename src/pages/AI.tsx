@@ -93,7 +93,17 @@ export default function AI() {
       });
     } catch (err: any) {
       console.error("Chat error:", err);
-      setError("I'm sorry, I encountered an issue while processing your request. Please try again in a moment, or contact support if the problem persists.");
+      let errorMessage = "I'm sorry, I encountered an issue while processing your request. Please try again in a moment.";
+      if (err.message && err.message.toLowerCase().includes("api key") || err.status === 401 || err.status === 403) {
+        errorMessage = "Invalid API Key. Please update your AI API key in Settings.";
+      } else if (err.message && err.message.toLowerCase().includes("quota") || err.status === 429) {
+        errorMessage = "Rate limit or quota exceeded. Please try again later.";
+      } else if (err.message && (err.message.toLowerCase().includes("network") || err.message.toLowerCase().includes("fetch"))) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = `API Error: ${err.message}`;
+      }
+      setError(errorMessage);
     } finally {
       setIsChatting(false);
     }
@@ -130,7 +140,17 @@ Output the response in JSON format. The JSON should contain exactly these keys:
       }
     } catch (err: any) {
       console.error("Error generating persona:", err);
-      setError(err.message || "Failed to generate persona. Please try again.");
+      let errorMessage = "Failed to generate persona. Please try again.";
+      if (err.message && err.message.toLowerCase().includes("api key") || err.status === 401 || err.status === 403) {
+        errorMessage = "Invalid API Key. Please update your AI API key in Settings.";
+      } else if (err.message && err.message.toLowerCase().includes("quota") || err.status === 429) {
+        errorMessage = "Rate limit or quota exceeded. Please try again later.";
+      } else if (err.message && (err.message.toLowerCase().includes("network") || err.message.toLowerCase().includes("fetch"))) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (err.message) {
+        errorMessage = `API Error: ${err.message}`;
+      }
+      setError(errorMessage);
     } finally {
       setIsGeneratingPersona(false);
     }
@@ -170,7 +190,17 @@ ${contentInput}`;
       }
     } catch (openaiError: any) {
       console.error("API failed:", openaiError);
-      setError(openaiError.message || "An error occurred while analyzing content. Please check your API keys.");
+      let errorMessage = "An error occurred while analyzing content.";
+      if (openaiError.message && openaiError.message.toLowerCase().includes("api key") || openaiError.status === 401 || openaiError.status === 403) {
+        errorMessage = "Invalid API Key. Please update your AI API key in Settings.";
+      } else if (openaiError.message && openaiError.message.toLowerCase().includes("quota") || openaiError.status === 429) {
+        errorMessage = "Rate limit or quota exceeded. Please try again later.";
+      } else if (openaiError.message && (openaiError.message.toLowerCase().includes("network") || openaiError.message.toLowerCase().includes("fetch"))) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (openaiError.message) {
+        errorMessage = `API Error: ${openaiError.message}`;
+      }
+      setError(errorMessage);
     } finally {
       setIsAnalyzing(false);
     }

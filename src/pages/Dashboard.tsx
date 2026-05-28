@@ -7,10 +7,10 @@ import {
   ArrowUpRight, Users, MousePointerClick, TrendingUp, 
   Briefcase, CheckCircle2, Clock, AlertCircle, Plus,
   MoreVertical, Calendar, Target, Zap, Building2, ArrowRight,
-  Activity, BarChart3
+  Activity, BarChart3, Trash2, X, Loader2
 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { collection, query, where, onSnapshot, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'motion/react';
+import { collection, query, where, onSnapshot, orderBy, limit, addDoc, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [newProjectName, setNewProjectName] = useState('');
   const [trafficData, setTrafficData] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [businessProfile] = useLocalStorage('trimatrix_business_profile', {
     companyName: '',
@@ -69,6 +72,7 @@ export default function Dashboard() {
 
   const createProject = async () => {
     if (!user || !newProjectName.trim()) return;
+    setErrorMsg(null);
     try {
       await addDoc(collection(db, 'projects'), {
         name: newProjectName,
@@ -79,7 +83,26 @@ export default function Dashboard() {
       });
       setNewProjectName('');
     } catch (err) {
+      setErrorMsg('Failed to create project. Check permissions.');
       handleFirestoreError(err, OperationType.CREATE, 'projects');
+    }
+  };
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return;
+    setIsDeleting(true);
+    setErrorMsg(null);
+    try {
+      await deleteDoc(doc(db, 'projects', projectToDelete.id));
+      if (activeProject?.id === projectToDelete.id) {
+        setActiveProject(null);
+      }
+      setProjectToDelete(null);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Error deleting project. Insufficient permissions.');
+      handleFirestoreError(err, OperationType.DELETE, `projects/${projectToDelete.id}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -179,6 +202,15 @@ export default function Dashboard() {
             <option value="">Select Project</option>
             {activeProjects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
+          {activeProject && (
+            <button 
+              onClick={() => setProjectToDelete(activeProject)}
+              className="bg-red-500/10 text-red-400 hover:bg-red-500/20 p-2 rounded-lg transition-colors border border-red-500/20"
+              title="Delete Active Project"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
           <input 
             type="text"
             value={newProjectName}
@@ -195,6 +227,14 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* Error Message */}
+      {errorMsg && (
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-start">
+          <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+          <p className="text-sm">{errorMsg}</p>
+        </motion.div>
+      )}
 
       {isProfileIncomplete && (
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-theme-primary/20 to-purple-500/20 border border-theme-primary/30 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -380,6 +420,59 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {projectToDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col"
+            >
+              <div className="p-6 border-b border-white/10 flex justify-between items-center bg-red-500/10">
+                <h2 className="text-xl font-bold text-red-500 flex items-center">
+                  <AlertCircle className="w-6 h-6 mr-3" />
+                  Delete Project
+                </h2>
+                <button onClick={() => setProjectToDelete(null)} className="text-theme-muted hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6">
+                <p className="text-theme-main mb-4">
+                  Are you sure you want to delete the project <span className="font-bold">"{projectToDelete.name}"</span>?
+                </p>
+                <p className="text-theme-muted text-sm border-l-2 border-red-500 pl-3">
+                  This action cannot be undone. All project-specific data including activities, social posts, generated content, and analytics will be permanently deleted.
+                </p>
+                <div className="flex items-center justify-end gap-3 mt-8">
+                  <button
+                    onClick={() => setProjectToDelete(null)}
+                    disabled={isDeleting}
+                    className="px-4 py-2 rounded-lg text-theme-muted hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteProject}
+                    disabled={isDeleting}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium flex items-center transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+                    Delete Project
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
