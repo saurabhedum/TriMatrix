@@ -9,8 +9,6 @@ import { db, handleFirestoreError, OperationType } from '../firebase';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useNotifications } from '../context/NotificationContext';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
 const DEFAULT_DYNAMIC_VARIABLES = [
   { key: '{{primary_keyword}}', value: 'ai marketing automation' },
   { key: '{{current_year}}', value: '2026' },
@@ -55,7 +53,7 @@ export default function SeoEngine() {
   };
 
   const [apiKeys] = useLocalStorage('trimatrix_api_keys', []);
-  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || process.env.GEMINI_API_KEY;
+  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
 
   useEffect(() => {
     if (!isAuthReady || !user || !activeProject) {
@@ -278,15 +276,15 @@ export default function SeoEngine() {
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-theme-main tracking-tight">SEO Automation Engine</h1>
-          <p className="text-theme-muted mt-1">Live keyword tracking, dynamic variables, and strategy builder.</p>
+          <h1 className="text-3xl font-bold text-theme-main tracking-tight">Search Optimizer</h1>
+          <p className="text-theme-muted mt-1">Find what people search for and build your ranking plan.</p>
         </div>
         <button 
           onClick={handleRefresh}
           className="bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg flex items-center transition-colors shadow-lg shadow-theme-primary/20"
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Force Refresh Trends
+          Update Trends
         </button>
       </div>
 
@@ -303,7 +301,7 @@ export default function SeoEngine() {
           <div className="p-6 border-b border-white/10 flex justify-between items-center">
             <h3 className="text-lg font-semibold text-theme-main flex items-center">
               <Search className="w-5 h-5 mr-2 text-theme-primary" />
-              Live Keyword Trends
+              Popular Searches
             </h3>
             <span className="text-xs bg-white/10 text-theme-muted px-2 py-1 rounded-md">Updated 5m ago</span>
           </div>
@@ -352,7 +350,7 @@ export default function SeoEngine() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-theme-main flex items-center">
                 <Target className="w-5 h-5 mr-2 text-indigo-400" />
-                AI Keyword Strategy & Suggestions
+                AI Search Ideas
               </h3>
               <button 
                 onClick={generateAISuggestions}
@@ -360,7 +358,7 @@ export default function SeoEngine() {
                 className="bg-indigo-600/20 text-indigo-400 hover:bg-indigo-600/30 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center disabled:opacity-50"
               >
                 {loadingSuggestions ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
-                {loadingSuggestions ? 'Analyzing...' : 'Generate AI Insights'}
+                {loadingSuggestions ? 'Thinking...' : 'Get AI Ideas'}
               </button>
             </div>
             
@@ -371,7 +369,7 @@ export default function SeoEngine() {
                 className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"
               >
                 <div className="bg-black/30 border border-white/5 rounded-xl p-4">
-                  <h4 className="text-sm font-semibold text-emerald-400 mb-3">Long-Tail Opportunities</h4>
+                  <h4 className="text-sm font-semibold text-emerald-400 mb-3">More Specific Searches</h4>
                   <ul className="space-y-2">
                     {aiSuggestions.longTail.map((kw: string, i: number) => (
                       <li key={i} className="text-xs text-theme-muted flex items-start justify-between group">
@@ -391,7 +389,7 @@ export default function SeoEngine() {
                   </ul>
                 </div>
                 <div className="bg-black/30 border border-white/5 rounded-xl p-4">
-                  <h4 className="text-sm font-semibold text-amber-400 mb-3">Content Clusters</h4>
+                  <h4 className="text-sm font-semibold text-amber-400 mb-3">Topic Categories</h4>
                   <ul className="space-y-3">
                     {aiSuggestions.clusters.map((cluster: any, i: number) => (
                       <li key={i} className="text-xs text-theme-muted group relative pr-6">
@@ -409,7 +407,7 @@ export default function SeoEngine() {
                   </ul>
                 </div>
                 <div className="bg-black/30 border border-white/5 rounded-xl p-4">
-                  <h4 className="text-sm font-semibold text-indigo-400 mb-3">Optimization Strategies</h4>
+                  <h4 className="text-sm font-semibold text-indigo-400 mb-3">How to Improve</h4>
                   <ul className="space-y-2">
                     {aiSuggestions.strategies.map((strategy: string, i: number) => (
                       <li key={i} className="text-xs text-theme-muted flex items-start justify-between group">
@@ -431,7 +429,7 @@ export default function SeoEngine() {
               </motion.div>
             ) : (
               <div className="text-center py-8 border border-dashed border-white/10 rounded-xl bg-black/10">
-                <p className="text-sm text-theme-muted">Click "Generate AI Insights" to analyze your tracked keywords and discover new opportunities.</p>
+                <p className="text-sm text-theme-muted">Click "Get AI Ideas" to analyze your tracked keywords and discover new opportunities.</p>
               </div>
             )}
           </div>
@@ -440,7 +438,7 @@ export default function SeoEngine() {
         {/* Dynamic Variables & Recommendations */}
         <div className="space-y-8">
           <div className="glassy-neumorphic rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-theme-main mb-4">Dynamic Variables</h3>
+            <h3 className="text-lg font-semibold text-theme-main mb-4">Custom Text Pieces</h3>
             <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               {dynamicVariables.map((v: any, i: number) => (
                 <div key={i} className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 bg-black/20 rounded-lg border border-white/5 gap-2">
@@ -458,7 +456,7 @@ export default function SeoEngine() {
           </div>
 
           <div className="glassy-neumorphic rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-theme-main mb-4">On-Page Recommendations</h3>
+            <h3 className="text-lg font-semibold text-theme-main mb-4">Page Fixes</h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400 mr-3 flex-shrink-0 mt-0.5" />
@@ -481,7 +479,7 @@ export default function SeoEngine() {
       <div className="glassy-neumorphic rounded-2xl p-6">
         <h3 className="text-lg font-semibold text-theme-main mb-6 flex items-center">
           <Target className="w-5 h-5 mr-2 text-theme-primary" />
-          Competitor Keyword Gap Analysis
+          Compare with Competitors
         </h3>
         <div className="flex gap-4 mb-6">
           <input 
@@ -492,7 +490,7 @@ export default function SeoEngine() {
             className="flex-1 bg-black/20 border border-white/10 rounded-xl p-3 text-theme-main focus:ring-2 focus:ring-theme-primary outline-none"
           />
           <button onClick={runGapAnalysis} className="bg-theme-primary text-white px-6 py-3 rounded-xl font-medium hover:bg-theme-primary-hover transition-colors">
-            Analyze Gap
+            Analyze
           </button>
         </div>
         {gapKeywords.length > 0 && (
@@ -513,7 +511,7 @@ export default function SeoEngine() {
       {/* Strategy Builder */}
       <div className="glassy-neumorphic rounded-2xl p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-          <h3 className="text-xl font-semibold text-theme-main">Strategy Builder</h3>
+          <h3 className="text-xl font-semibold text-theme-main">Plan Maker</h3>
           <div className="flex items-center gap-2">
             <input 
               type="text" 

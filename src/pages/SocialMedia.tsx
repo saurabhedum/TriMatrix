@@ -139,8 +139,7 @@ export default function SocialMedia() {
       try {
         const groqKey =
           apiKeys.find((k: any) => k.id === "groq")?.value ||
-          import.meta.env.VITE_GROQ_API_KEY ||
-          process.env.GROQ_API_KEY;
+          import.meta.env.VITE_GROQ_API_KEY || '';
         const { default: Groq } = await import("groq-sdk");
         const groq = new Groq({
           apiKey: groqKey,
@@ -267,7 +266,8 @@ export default function SocialMedia() {
     if (!newPostContent.trim()) return;
     setIsGeneratingHashtags(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
+      const ai = new GoogleGenAI({ apiKey: geminiKey });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: `Generate 5 relevant, trending hashtags for this social media post. Return ONLY the hashtags separated by spaces, no other text. Post: "${newPostContent}"`,
@@ -431,10 +431,10 @@ export default function SocialMedia() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-            Social Media Automation
+            Social Media Tools
           </h1>
           <p className="text-theme-muted mt-1">
-            Manage connected APIs and auto-posting schedules.
+            Manage accounts and schedule posts.
           </p>
         </div>
         <button
@@ -442,14 +442,14 @@ export default function SocialMedia() {
           className="bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg flex items-center transition-colors shadow-lg shadow-theme-primary/20"
         >
           <Edit3 className="w-4 h-4 mr-2" />
-          Create Post
+          New Post
         </button>
         <button
           onClick={toggleAutoOptimize}
           className={`px-4 py-2 rounded-lg flex items-center transition-colors border ${isAutoOptimizing ? "bg-emerald-500/20 border-emerald-500 text-emerald-400" : "bg-black/20 border-white/10 text-theme-muted hover:bg-white/10"}`}
         >
           <Sparkles className="w-4 h-4 mr-2" />
-          {isAutoOptimizing ? "Auto-Optimizing Active" : "Enable Auto-Optimize"}
+          {isAutoOptimizing ? "Auto Improvements On" : "Turn On Auto Improvements"}
         </button>
       </div>
 
@@ -463,10 +463,10 @@ export default function SocialMedia() {
             <div>
               <h3 className="text-lg font-semibold text-theme-main flex items-center mb-1">
                 <Activity className="w-5 h-5 mr-2 text-theme-primary" />
-                Cross-Channel Sentiment Sync
+                How People Feel
               </h3>
               <p className="text-sm text-theme-muted">
-                Real-time unified sentiment across all connected platforms.
+                See if people like your posts.
               </p>
             </div>
             <div className="flex items-center">
@@ -515,7 +515,7 @@ export default function SocialMedia() {
             <div className="p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <h3 className="text-lg font-semibold text-theme-main flex items-center">
                 <Share2 className="w-5 h-5 mr-2 text-theme-primary" />
-                Content Pipeline
+                Your Posts
               </h3>
               <div className="flex bg-black/20 p-1 rounded-xl border border-white/5">
                 <button
@@ -528,7 +528,7 @@ export default function SocialMedia() {
                   onClick={() => setActiveTab("warroom")}
                   className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center ${activeTab === "warroom" ? "bg-theme-primary text-white shadow-md" : "text-theme-muted hover:text-theme-main hover:bg-white/5"}`}
                 >
-                  <Users className="w-3 h-3 mr-1.5" /> War-Room
+                  <Users className="w-3 h-3 mr-1.5" /> Team Chat
                 </button>
               </div>
 
@@ -555,10 +555,10 @@ export default function SocialMedia() {
                 <div className="p-4 border-b border-white/5 flex items-center justify-between">
                   <div>
                     <h4 className="font-bold text-theme-main">
-                      Collaborative Content War-Room
+                      Team Chat
                     </h4>
                     <p className="text-xs text-theme-muted">
-                      Live drafting & team ideation
+                      Chat and plan together
                     </p>
                   </div>
                   <div className="flex -space-x-2">
@@ -622,8 +622,7 @@ export default function SocialMedia() {
                   No posts yet
                 </h4>
                 <p className="text-theme-muted max-w-sm mt-2 mb-6">
-                  Create your first social media post or AI-generated campaign
-                  to start tracking engagement and analyzing real sentiment.
+                  Create a post to see how people react to it.
                 </p>
                 <button
                   onClick={() => setIsCreateModalOpen(true)}
@@ -858,7 +857,7 @@ export default function SocialMedia() {
         <div className="space-y-8">
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-theme-main mb-4">
-              Hashtag Optimizer
+              Hashtag Tool
             </h3>
             <div className="flex items-center gap-2 mb-4">
               <div className="relative flex-1">
@@ -955,7 +954,7 @@ export default function SocialMedia() {
               <div className="p-6 border-b border-white/10 flex justify-between items-center bg-black/20">
                 <h2 className="text-xl font-bold text-theme-main flex items-center">
                   <Edit3 className="w-5 h-5 mr-2 text-theme-primary" />
-                  Create New Post
+                  Write a New Post
                 </h2>
                 <button
                   onClick={() => setIsCreateModalOpen(false)}
@@ -968,7 +967,7 @@ export default function SocialMedia() {
               <div className="p-6 space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-theme-main mb-2">
-                    Platform
+                    Where to post
                   </label>
                   <select
                     value={newPostPlatform}
@@ -986,21 +985,21 @@ export default function SocialMedia() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <label className="block text-sm font-medium text-theme-main">
-                      Content
+                      What to say
                     </label>
                     <div className="flex space-x-3">
                       <button
                         onClick={generateCreative}
                         className="text-xs flex items-center text-purple-400 hover:text-purple-300 transition-colors"
                       >
-                        <ImageIcon className="w-3 h-3 mr-1" /> AI Creative Suite
+                        <ImageIcon className="w-3 h-3 mr-1" /> AI Design Tool
                       </button>
                       <button
                         onClick={toggleListening}
                         className={`text-xs flex items-center transition-colors ${isListening ? "text-red-400 animate-pulse" : "text-theme-primary hover:text-theme-primary-hover"}`}
                       >
                         <Mic className="w-3 h-3 mr-1" />{" "}
-                        {isListening ? "Listening..." : "Voice-to-Campaign"}
+                        {isListening ? "Listening..." : "Voice to Text"}
                       </button>
                       <button
                         onClick={handleGenerateHashtags}
@@ -1014,7 +1013,7 @@ export default function SocialMedia() {
                         ) : (
                           <Sparkles className="w-3 h-3 mr-1" />
                         )}
-                        AI Hashtags
+                        Get Hashtags
                       </button>
                     </div>
                   </div>
@@ -1029,7 +1028,7 @@ export default function SocialMedia() {
 
                 <div>
                   <label className="block text-sm font-medium text-theme-main mb-2">
-                    Schedule For (Optional)
+                    When to post (Optional)
                   </label>
                   <input
                     type="datetime-local"
@@ -1044,14 +1043,11 @@ export default function SocialMedia() {
                       defaultChecked={!!newPostScheduledFor}
                     />
                     <span>
-                      Enable Algorithm-Tunable Deployment (Auto-adjust peak
-                      time)
+                      Post at the best times
                     </span>
                   </label>
                   <p className="text-[10px] text-theme-muted">
-                    If enabled, AI dynamically adjusts standard schedules within
-                    ±45 min boundaries to exploit momentary algorithm drops or
-                    peaks.
+                    If enabled, AI will adjust the time to get the most views.
                   </p>
                 </div>
               </div>

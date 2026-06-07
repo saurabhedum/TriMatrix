@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   BrainCircuit,
+  Globe,
   BookOpen,
   Share2,
   MessageCircle,
@@ -143,11 +144,11 @@ export default function Intel() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-4xl font-bold text-theme-main tracking-tight flex items-center">
-            <BrainCircuit className="w-10 h-10 mr-4 text-theme-primary" />
-            Trimatrix Intel
+            <Globe className="w-10 h-10 mr-4 text-theme-primary" />
+            Market Insights
           </h1>
           <p className="text-theme-muted mt-2 text-lg">
-            Central Business Marketing Hub & AI Brain
+            See your market trends and ideas.
           </p>
         </div>
         <div className="flex bg-black/20 p-1 rounded-xl border border-white/5">

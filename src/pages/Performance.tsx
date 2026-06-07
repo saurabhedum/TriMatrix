@@ -87,8 +87,8 @@ export default function Performance() {
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-theme-main tracking-tight">Performance Optimization AI</h1>
-          <p className="text-theme-muted mt-1">Analyze content performance and suggest improvements automatically.</p>
+          <h1 className="text-3xl font-bold text-theme-main tracking-tight">Improvements</h1>
+          <p className="text-theme-muted mt-1">See what is slowing you down and how to fix it.</p>
         </div>
         <div className="flex items-center gap-4">
           <label className="flex items-center space-x-3 cursor-pointer bg-black/20 border border-white/10 px-4 py-2.5 rounded-xl">
@@ -100,7 +100,7 @@ export default function Performance() {
             />
             <span className="text-theme-main font-medium flex items-center text-sm">
               <Settings className="w-4 h-4 mr-2 text-theme-primary" />
-              Auto-Optimize Campaigns
+              Auto Improvements
             </span>
           </label>
           <button 
@@ -109,7 +109,7 @@ export default function Performance() {
             className="bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-xl flex items-center transition-all shadow-lg shadow-theme-primary/20 font-medium"
           >
             {isAnalyzing ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Zap className="w-5 h-5 mr-2" />}
-            {isAnalyzing ? 'Analyzing...' : 'Run Full Analysis'}
+            {isAnalyzing ? 'Checking...' : 'Check Now'}
           </button>
         </div>
       </div>

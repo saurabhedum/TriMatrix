@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = auth?.currentUser !== undefined ? onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       
       if (currentUser) {
@@ -49,7 +49,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       setIsAuthReady(true);
-    });
+    }) : () => {};
+
+    if (auth?.currentUser === undefined) {
+       console.warn("Firebase Auth not initialized properly. App is in degraded state.");
+       setIsAuthReady(true);
+    }
 
     return () => unsubscribe();
   }, []);

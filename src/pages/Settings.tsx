@@ -80,24 +80,24 @@ export default function Settings() {
     [
       {
         id: "auto_publish",
-        name: "Autonomous Publishing",
-        desc: "Allow AI to publish content without human approval.",
+        name: "Auto Publish",
+        desc: "Let AI post without asking.",
         iconName: "Shield",
         color: "text-indigo-400",
         enabled: false,
       },
       {
         id: "auto_ab",
-        name: "Auto-A/B Testing",
-        desc: "Automatically create and run A/B tests on underperforming pages.",
+        name: "Auto Testing",
+        desc: "Test different versions of your pages to see what works.",
         iconName: "Zap",
         color: "text-amber-400",
         enabled: true,
       },
       {
         id: "critical_alerts",
-        name: "Critical Alerts Only",
-        desc: "Only notify for critical system failures or massive traffic drops.",
+        name: "Only Important Alerts",
+        desc: "Only tell me when something is broken.",
         iconName: "Bell",
         color: "text-emerald-400",
         enabled: true,
@@ -112,16 +112,16 @@ export default function Settings() {
       },
       {
         id: "dynamic_budget",
-        name: "Dynamic Budget Allocation",
-        desc: "Allow AI to shift ad spend between platforms based on real-time ROI.",
+        name: "Smart Budget",
+        desc: "Move money to ads that work best.",
         iconName: "BarChart3",
         color: "text-purple-400",
         enabled: false,
       },
       {
         id: "auto_seo",
-        name: "Auto-SEO Optimization",
-        desc: "Allow AI to automatically update meta tags and alt text on live pages.",
+        name: "Auto SEO",
+        desc: "Let AI fix SEO for your site automatically.",
         iconName: "Search",
         color: "text-sky-400",
         enabled: true,
@@ -353,22 +353,21 @@ export default function Settings() {
     <div className="space-y-8 max-w-5xl mx-auto p-6 lg:p-8">
       <div>
         <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-          System Settings
+          Settings
         </h1>
         <p className="text-theme-muted mt-2">
-          Manage API keys, platform integrations, and global automation
-          controls.
+          Manage your account, tools, and auto-settings.
         </p>
       </div>
 
       <div className="flex border-b border-white/10 overflow-x-auto custom-scrollbar pb-px">
         {[
-          { id: "api", name: "API Keys", icon: Key },
-          { id: "integrations", name: "Integrations", icon: Link },
-          { id: "api_testing", name: "API Testing", icon: Zap },
-          { id: "automation", name: "Automation Controls", icon: ToggleRight },
-          { id: "notifications", name: "Notifications", icon: Bell },
-          { id: "business", name: "Business Profile", icon: Building2 },
+          { id: "api", name: "Keys", icon: Key },
+          { id: "integrations", name: "Connections", icon: Link },
+          { id: "api_testing", name: "Test Settings", icon: Zap },
+          { id: "automation", name: "Auto-Settings", icon: ToggleRight },
+          { id: "notifications", name: "Alerts", icon: Bell },
+          { id: "business", name: "Business Info", icon: Building2 },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -395,7 +394,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold text-theme-main flex items-center">
                 <Key className="w-5 h-5 mr-2 text-theme-primary" />
-                API & Core Services
+                Keys & Services
               </h3>
               <button
                 onClick={() => setIsAddingKey(!isAddingKey)}

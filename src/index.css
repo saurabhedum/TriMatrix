@@ -81,3 +81,8 @@
   .border-theme-primary { border-color: var(--primary); }
   .hover\:bg-theme-primary-hover:hover { background-color: var(--primary-hover); }
 }
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) {
+  height: 911.8px !important;
+  width: 991.4px !important;
+}

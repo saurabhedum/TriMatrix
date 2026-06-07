@@ -86,9 +86,7 @@ export default function Dashboard() {
   });
 
   const [apiKeys] = useLocalStorage("trimatrix_api_keys", []);
-  const geminiKey =
-    apiKeys.find((k: any) => k.id === "gemini")?.value ||
-    process.env.GEMINI_API_KEY;
+  const geminiKey = apiKeys.find((k: any) => k.id === "gemini")?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
 
   const [onboardingData] = useLocalStorage("trimatrix_onboarding", null);
 
@@ -296,10 +294,10 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-            Project Management
+            Manage Your Projects
           </h1>
           <p className="text-theme-muted mt-1">
-            End-to-end digital marketing overview.
+            A clear look at your projects and numbers.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -397,11 +395,10 @@ export default function Dashboard() {
           <div className="flex-1">
             <h2 className="text-xl font-bold text-theme-main flex items-center mb-2">
               <BrainCircuit className="w-6 h-6 mr-2 text-theme-primary" />
-              TriMatrix Nexus Core
+              Smart Assistant
             </h2>
             <p className="text-sm text-theme-muted mb-4 max-w-xl">
-              Central intelligence module active. Real-time omnichannel data
-              processing and predictive scaling enabled.
+              The AI is watching your data and finding ways to improve your business automatically.
             </p>
             <button
               onClick={toggleAutoOptimize}
@@ -413,8 +410,8 @@ export default function Dashboard() {
             >
               <Sparkles className="w-4 h-4 mr-2" />
               {isAutoOptimizing
-                ? "Omnichannel Auto-Optimization ENABLED"
-                : "Enable Auto-Optimization"}
+                ? "Auto Improvements Are On"
+                : "Turn On Auto Improvements"}
             </button>
           </div>
 
@@ -446,7 +443,7 @@ export default function Dashboard() {
           >
             <h3 className="text-sm font-semibold text-theme-main mb-3 flex items-center">
               <Zap className="w-4 h-4 mr-2 text-amber-400" />
-              Predictive Insights & Autonomous Actions
+              Smart Suggestions & Actions
             </h3>
             <div className="space-y-2">
               {predictiveInsights.map((insight, idx) => (
@@ -535,7 +532,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 glassy-neumorphic rounded-2xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-theme-main">
-              Performance Overview
+              How Are Things Going?
             </h3>
             <div className="flex items-center gap-3">
               {trafficData.length === 0 && (

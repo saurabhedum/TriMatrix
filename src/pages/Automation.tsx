@@ -171,10 +171,10 @@ export default function Automation() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-            Automation Engine (Core Brain)
+            Auto Tasks
           </h1>
           <p className="text-theme-muted mt-1">
-            Manage end-to-end service-wise automations and feedback loops.
+            Manage your automatic tasks and connections.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">

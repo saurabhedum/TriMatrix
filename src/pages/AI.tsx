@@ -10,7 +10,7 @@ import { useProjects } from '../context/ProjectContext';
 
 export default function AI() {
   const [apiKeys] = useLocalStorage('trimatrix_api_keys', []);
-  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || process.env.GEMINI_API_KEY;
+  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
   const ai = new GoogleGenAI({ apiKey: geminiKey || '' });
 
   const [persona, setPersona] = useState<any>(null);
@@ -212,9 +212,9 @@ ${contentInput}`;
         <div>
           <h1 className="text-3xl font-bold text-theme-main flex items-center">
             <BrainCircuit className="w-8 h-8 mr-3 text-theme-primary" />
-            AI Assistant
+            AI Helper
           </h1>
-          <p className="text-theme-muted mt-2">Your personal digital marketing intelligence.</p>
+          <p className="text-theme-muted mt-2">Your smart assistant for marketing.</p>
         </div>
       </div>
 
@@ -270,14 +270,14 @@ ${contentInput}`;
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-theme-main mb-4 flex items-center">
               <Users className="w-5 h-5 mr-2 text-theme-primary" />
-              Customer Persona Generator
+              Customer Profile Maker
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <input 
                 type="text" 
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value)}
-                placeholder="Target Audience (e.g., SaaS CTOs)" 
+                placeholder="Who is your customer? (e.g., Doctors)" 
                 className="bg-black/20 border border-white/10 rounded-xl p-3 text-theme-main" 
               />
               <button 
@@ -286,15 +286,15 @@ ${contentInput}`;
                 className="bg-theme-primary text-white rounded-xl p-3 font-medium hover:bg-theme-primary-hover disabled:opacity-50 flex items-center justify-center"
               >
                 {isGeneratingPersona ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                Generate Persona
+                Generate Profile
               </button>
             </div>
             {persona && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-2 mt-4">
                 <h4 className="text-theme-main font-bold flex items-center"><User className="w-4 h-4 mr-2"/>{persona.name}</h4>
-                <p className="text-theme-muted text-sm"><strong>Demographics:</strong> {persona.demographics}</p>
-                <p className="text-theme-muted text-sm"><strong>Psychographics:</strong> {persona.psychographics}</p>
-                <p className="text-theme-muted text-sm"><strong>Behavioral:</strong> {persona.behavioral}</p>
+                <p className="text-theme-muted text-sm"><strong>Age/Location:</strong> {persona.demographics}</p>
+                <p className="text-theme-muted text-sm"><strong>Interests:</strong> {persona.psychographics}</p>
+                <p className="text-theme-muted text-sm"><strong>Habits:</strong> {persona.behavioral}</p>
               </motion.div>
             )}
           </div>
@@ -303,9 +303,9 @@ ${contentInput}`;
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-theme-main mb-4 flex items-center">
               <FileText className="w-5 h-5 mr-2 text-indigo-400" />
-              AI Content Analysis
+              Check Content
             </h3>
-            <p className="text-sm text-theme-muted mb-4">Paste your blog post, copy, or URL to get instant feedback on SEO, readability, and engagement.</p>
+            <p className="text-sm text-theme-muted mb-4">Paste text to see how to improve it.</p>
             
             <div className="space-y-4">
               <textarea 
@@ -322,12 +322,12 @@ ${contentInput}`;
                 {isAnalyzing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing Content...
+                    Checking...
                   </>
                 ) : (
                   <>
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    Analyze Content
+                    Check It
                   </>
                 )}
               </button>
@@ -344,7 +344,7 @@ ${contentInput}`;
                     <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mb-2">
                       <span className="text-xl font-bold text-emerald-400">{analysisResult.seoScore}</span>
                     </div>
-                    <span className="text-xs text-theme-muted font-medium uppercase tracking-wider">SEO Score</span>
+                    <span className="text-xs text-theme-muted font-medium uppercase tracking-wider">Search Score</span>
                   </div>
                   <div className="bg-black/30 border border-white/5 rounded-xl p-4 flex flex-col items-center justify-center text-center">
                     <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center mb-2">
@@ -357,15 +357,15 @@ ${contentInput}`;
                 
                 <div className="bg-black/30 border border-white/5 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span className="text-sm text-theme-muted flex items-center"><FileText className="w-4 h-4 mr-2 text-slate-400"/> Readability</span>
+                    <span className="text-sm text-theme-muted flex items-center"><FileText className="w-4 h-4 mr-2 text-slate-400"/> Easy to Read</span>
                     <span className="text-sm font-medium text-theme-main">{analysisResult.readability}</span>
                   </div>
                   <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                    <span className="text-sm text-theme-muted flex items-center"><Heart className="w-4 h-4 mr-2 text-rose-400"/> Sentiment</span>
+                    <span className="text-sm text-theme-muted flex items-center"><Heart className="w-4 h-4 mr-2 text-rose-400"/> Feedback Tone</span>
                     <span className="text-sm font-medium text-theme-main">{analysisResult.sentiment}</span>
                   </div>
                   <div className="pt-2">
-                    <span className="text-sm font-medium text-theme-main mb-2 block">AI Suggestions:</span>
+                    <span className="text-sm font-medium text-theme-main mb-2 block">How to Improve:</span>
                     <ul className="space-y-2">
                       {analysisResult.suggestions.map((s: string, i: number) => (
                         <li key={i} className="text-xs text-theme-muted flex items-start">
@@ -385,7 +385,7 @@ ${contentInput}`;
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-lg font-semibold text-theme-main mb-4 flex items-center">
               <Sparkles className="w-5 h-5 mr-2 text-theme-primary" />
-              Suggested Prompts
+              Try These
             </h3>
             <div className="space-y-3">
               {[

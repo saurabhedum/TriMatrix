@@ -28,10 +28,10 @@ export default function Magic() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-theme-main flex items-center">
-            <Sparkles className="w-8 h-8 mr-3 text-theme-primary" />
-            Magic Tools
+            <Wand2 className="w-8 h-8 mr-3 text-theme-primary" />
+            Extra Tools
           </h1>
-          <p className="text-theme-muted mt-2">State-of-the-art experimental features to dazzle your workflow.</p>
+          <p className="text-theme-muted mt-2">Extra features to help your work.</p>
         </div>
       </div>
 

@@ -76,9 +76,7 @@ const TONES = [
 
 export default function ContentGen() {
   const [apiKeys] = useLocalStorage("trimatrix_api_keys", []);
-  const geminiKey =
-    apiKeys.find((k: any) => k.id === "gemini")?.value ||
-    process.env.GEMINI_API_KEY;
+  const geminiKey = apiKeys.find((k: any) => k.id === "gemini")?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
   const { activeProject } = useProjects();
   const { user } = useAuth();
 
@@ -282,10 +280,10 @@ export default function ContentGen() {
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-          Content Generation System
+          Write Content
         </h1>
         <p className="text-theme-muted mt-1">
-          Auto-generate multi-platform content using AI.
+          Let AI write your posts, blogs, and marketing text.
         </p>
       </div>
 
@@ -310,7 +308,7 @@ export default function ContentGen() {
           <form onSubmit={handleGenerate} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-theme-main mb-2">
-                Topic or Keyword
+                What is this about?
               </label>
               <input
                 type="text"
@@ -324,7 +322,7 @@ export default function ContentGen() {
 
             <div>
               <label className="block text-sm font-medium text-theme-main mb-2">
-                Platform Format
+                Where are you posting this?
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[240px] overflow-y-auto pr-2 custom-scrollbar">
                 {PLATFORMS.map((p) => (
@@ -350,7 +348,7 @@ export default function ContentGen() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-theme-main mb-2">
-                  Tone of Voice
+                  How should it sound?
                 </label>
                 <select
                   value={tone}
@@ -371,7 +369,7 @@ export default function ContentGen() {
 
               <div>
                 <label className="block text-sm font-medium text-theme-main mb-2">
-                  Target Language
+                  What language?
                 </label>
                 <select
                   value={language}
@@ -401,7 +399,7 @@ export default function ContentGen() {
                 />
                 <span className="text-theme-main font-medium flex items-center">
                   <ShieldAlert className="w-4 h-4 mr-2 text-rose-400" />
-                  Competitor Counter-Strike Mode
+                  Beat a Competitor
                 </span>
               </label>
 
@@ -412,7 +410,7 @@ export default function ContentGen() {
                   className="mb-4"
                 >
                   <label className="block text-sm font-medium text-theme-main mb-2">
-                    Competitor URL to Counter
+                    Competitor's Page Link
                   </label>
                   <input
                     type="url"
@@ -435,12 +433,12 @@ export default function ContentGen() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Generating Magic...
+                  Writing...
                 </>
               ) : (
                 <>
                   <Send className="w-5 h-5 mr-2" />
-                  Generate Content
+                  Write It
                 </>
               )}
             </button>
@@ -449,12 +447,12 @@ export default function ContentGen() {
           <div className="border-t border-white/10 pt-8 mt-8">
             <h3 className="text-xl font-semibold text-theme-main mb-6 flex items-center">
               <AlignLeft className="w-5 h-5 mr-3 text-theme-primary" />
-              AI Text Summarizer
+              Summarize Long Text
             </h3>
             <textarea
               value={textToSummarize}
               onChange={(e) => setTextToSummarize(e.target.value)}
-              placeholder="Paste long text here to summarize..."
+              placeholder="Paste your long text here..."
               className="w-full h-32 bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-theme-main placeholder-theme-muted focus:outline-none focus:border-theme-primary transition-colors mb-4"
             />
             <div className="flex gap-4 mb-4">
@@ -495,7 +493,7 @@ export default function ContentGen() {
 
         <div className="glassy-neumorphic rounded-2xl p-6 lg:p-8 flex flex-col h-full min-h-[500px]">
           <h3 className="text-xl font-semibold text-theme-main mb-6">
-            Generated Output
+            Your Result
           </h3>
 
           {result ? (
@@ -510,7 +508,7 @@ export default function ContentGen() {
                     className={`w-5 h-5 mr-3 ${viralScore >= 90 ? "text-emerald-400" : viralScore >= 80 ? "text-blue-400" : "text-amber-400"}`}
                   />
                   <span className="text-sm font-medium text-theme-main">
-                    Predictive Viral Score:{" "}
+                    Chance to go viral:{" "}
                   </span>
                   <span
                     className={`ml-2 font-bold text-lg ${viralScore >= 90 ? "text-emerald-400" : viralScore >= 80 ? "text-blue-400" : "text-amber-400"}`}
@@ -551,7 +549,7 @@ export default function ContentGen() {
             <div className="flex-1 flex items-center justify-center border-2 border-dashed border-white/10 rounded-xl bg-black/10">
               <div className="text-center text-theme-muted">
                 <FileText className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                <p>Your AI-generated content will appear here</p>
+                <p>Your text will appear here.</p>
               </div>
             </div>
           )}

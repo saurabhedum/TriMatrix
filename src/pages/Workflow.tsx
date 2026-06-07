@@ -801,7 +801,8 @@ function WorkflowBuilder({ isFullScreen, toggleFullScreen }: any) {
     let ai: any = null;
     try {
       const { GoogleGenAI } = await import('@google/genai');
-      ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      const apiKey = localStorage.getItem('trimatrix_api_keys')?.includes('gemini') ? JSON.parse(localStorage.getItem('trimatrix_api_keys') || '[]').find((k: any) => k.id === 'gemini')?.value : '';
+      ai = new GoogleGenAI({ apiKey: apiKey || import.meta.env.VITE_GEMINI_API_KEY || '' });
     } catch (e) {
       console.error("Failed to initialize Gemini API", e);
     }

@@ -81,10 +81,10 @@ export default function Analytics() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-theme-main tracking-tight">
-            Analytics & Tracking Engine
+            Traffic & Data
           </h1>
           <p className="text-theme-muted mt-1">
-            Platform-wise performance metrics and insights.
+            See how your site and ads are doing.
           </p>
         </div>
         <div className="flex space-x-3">
@@ -139,12 +139,10 @@ export default function Analytics() {
               <div>
                 <h3 className="text-xl font-bold text-theme-main flex items-center mb-2">
                   <DollarSign className="w-6 h-6 mr-2 text-emerald-400" />{" "}
-                  Revenue Attribution Engine
+                  Where Your Money Comes From
                 </h3>
                 <p className="text-sm text-theme-muted max-w-lg mb-6">
-                  Hard dollar-value ROI mapping per content asset. We attribute
-                  conversions from organic and ad-driven traffic to the precise
-                  social post or email that originated it.
+                  See exactly which posts, emails, and ads are making you money. We track every sale back to where it started.
                 </p>
 
                 <div className="grid grid-cols-2 gap-6 max-w-sm">
@@ -214,12 +212,10 @@ export default function Analytics() {
         <div className="space-y-8">
           <div className="glassy-neumorphic rounded-2xl p-6">
             <h3 className="text-xl font-bold text-theme-main flex items-center mb-2">
-              <Archive className="w-5 h-5 mr-2 text-theme-primary" /> Historical
-              Performance Retrieval
+              <Archive className="w-5 h-5 mr-2 text-theme-primary" /> Old Content Ideas
             </h3>
             <p className="text-sm text-theme-muted max-w-2xl mb-6">
-              AI indexes your top-performing legacy assets and suggests ways to
-              modernize and repurpose them.
+              AI finds your old posts that did well and shows you how to reuse them today.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

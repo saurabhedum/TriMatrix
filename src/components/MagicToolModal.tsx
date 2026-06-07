@@ -17,7 +17,7 @@ export default function MagicToolModal({ tool, onClose }: MagicToolModalProps) {
   const { user } = useAuth();
   const { activeProject } = useProjects();
   const [apiKeys] = useLocalStorage('trimatrix_api_keys', []);
-  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || process.env.GEMINI_API_KEY;
+  const geminiKey = apiKeys.find((k: any) => k.id === 'gemini')?.value || import.meta.env.VITE_GEMINI_API_KEY || '';
 
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');

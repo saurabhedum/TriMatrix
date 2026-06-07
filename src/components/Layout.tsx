@@ -42,7 +42,14 @@ import {
   PieChart,
   Activity,
   Bell,
+  Home,
+  Flag,
+  Globe,
+  LineChart,
+  MessageCircle,
+  Wand2
 } from "lucide-react";
+
 import { clsx } from "clsx";
 import { useTheme } from "../context/ThemeContext";
 import { motion, AnimatePresence } from "motion/react";
@@ -52,17 +59,17 @@ import ProjectSwitcher from "./ProjectSwitcher";
 import LaunchCampaignModal from "./LaunchCampaignModal";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Onboarding", href: "/onboarding", icon: Target },
-  { name: "Trimatrix Intel", href: "/intel", icon: BrainCircuit },
-  { name: "SEO Engine", href: "/seo", icon: Search },
-  { name: "Content Gen", href: "/content", icon: PenTool },
-  { name: "Social Media", href: "/social", icon: Share2 },
-  { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  { name: "Performance AI", href: "/performance", icon: Zap },
-  { name: "Automation Core", href: "/automation", icon: Bot },
-  { name: "AI Assistant", href: "/ai", icon: Sparkles },
-  { name: "Magic Tools", href: "/magic", icon: Sparkles },
+  { name: "Home", href: "/dashboard", icon: Home },
+  { name: "Getting Started", href: "/onboarding", icon: Flag },
+  { name: "Market Insights", href: "/intel", icon: Globe },
+  { name: "Search Optimizer", href: "/seo", icon: LineChart },
+  { name: "Write Content", href: "/content", icon: PenTool },
+  { name: "Social Posts", href: "/social", icon: Share2 },
+  { name: "Reports", href: "/analytics", icon: PieChart },
+  { name: "Improvements", href: "/performance", icon: TrendingUp },
+  { name: "Auto Tasks", href: "/automation", icon: Bot },
+  { name: "AI Chat", href: "/ai", icon: MessageCircle },
+  { name: "Extra Tools", href: "/magic", icon: Wand2 },
   { name: "Settings", href: "/settings", icon: SettingsIcon },
 ];
 

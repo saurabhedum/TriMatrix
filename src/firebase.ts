@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import localFirebaseConfig from '../firebase-applet-config.json';
 
 const firebaseConfig = {
@@ -14,10 +14,28 @@ const firebaseConfig = {
   firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || localFirebaseConfig.firestoreDatabaseId
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
+let app;
+let db: Firestore | any = null;
+let auth: Auth | any = null;
 export const googleProvider = new GoogleAuthProvider();
+
+try {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApps()[0];
+  }
+  db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+  auth = getAuth(app);
+} catch (error) {
+  console.error('Failed to initialize Firebase:', error);
+  // We provide mock objects to prevent the app from crashing on import.
+  // The app will function in a degraded state.
+  db = {} as any;
+  auth = {} as any;
+}
+
+export { db, auth };
 
 export enum OperationType {
   CREATE = 'create',
