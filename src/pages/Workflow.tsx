@@ -91,32 +91,70 @@ const CustomNode = ({ data, isConnectable }: any) => {
     window.dispatchEvent(new CustomEvent('viewNodeLog', { detail: data }));
   };
 
+  const hasGlow = data.status === 'error' || data.status === 'running' || data.status === 'success' || data.selected;
+  let glowColor = 'rgba(255, 255, 255, 0)';
+  if (data.status === 'error') glowColor = 'rgba(244,63,94,0.3)';
+  else if (data.status === 'running') glowColor = 'rgba(99,102,241,0.3)';
+  else if (data.status === 'success') glowColor = 'rgba(52,211,153,0.3)';
+  else glowColor = 'rgba(255, 255, 255, 0.1)';
+
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className={`bg-slate-900 border-2 ${data.status === 'error' ? 'border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.5)]' : data.borderClass} text-white rounded-lg shadow-lg p-3 w-48 relative group`}
+      className={`bg-[#17181c] border border-[rgba(255,255,255,0.1)] text-white rounded-2xl shadow-xl w-64 relative group overflow-hidden`}
+      style={{
+        boxShadow: hasGlow ? `0 0 25px ${glowColor}` : 'none',
+        borderColor: data.status === 'error' ? '#f43f5e' : undefined
+      }}
     >
-      <Handle type="target" position={Position.Top} isConnectable={isConnectable} className="w-3 h-3 bg-slate-400 border-none" />
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <IconComponent className={`w-4 h-4 ${data.color}`} />
-          <span className="text-sm font-medium ml-2">{data.label}</span>
+      <div className={`h-1 w-full ${data.status === 'error' ? 'bg-rose-500' : 'bg-gradient-to-r from-rose-500 to-indigo-500'}`}></div>
+      <Handle type="target" position={Position.Left} isConnectable={isConnectable} className="w-3 h-3 bg-slate-400 border-none -ml-1.5" />
+      
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center font-medium text-xs text-slate-400 uppercase tracking-wider">
+            <IconComponent className={`w-3.5 h-3.5 ${data.color} mr-1.5`} />
+            {data.type || 'AI'}
+          </div>
+          {data.status === 'success' && <Icons.CheckCircle className="w-4 h-4 text-emerald-500" />}
+          {data.status === 'error' && <Icons.AlertTriangle className="w-4 h-4 text-rose-500" />}
+          {data.status === 'running' && <Icons.Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
         </div>
-        {data.status === 'success' && <Icons.CheckCircle className="w-4 h-4 text-emerald-500" />}
-        {data.status === 'error' && <Icons.AlertTriangle className="w-4 h-4 text-rose-500" />}
-        {data.status === 'running' && <Icons.Loader2 className="w-4 h-4 text-indigo-500 animate-spin" />}
+        
+        <h3 className="text-base font-semibold text-white mb-2">{data.label}</h3>
+        
+        <div className="text-xs text-slate-400 leading-relaxed mb-4 line-clamp-2">
+          {data.description || 'Action node'}
+        </div>
+        
+        <div className="flex space-x-2 mt-auto">
+          {data.config?.model && (
+            <span className="bg-white/5 border border-white/10 rounded-full px-2.5 py-1 text-[10px] text-slate-300">
+              {data.config.model}
+            </span>
+          )}
+          {data.config?.outputType && (
+            <span className="bg-white/5 border border-white/10 rounded-full px-2.5 py-1 text-[10px] text-slate-300">
+              {data.config.outputType}
+            </span>
+          )}
+        </div>
       </div>
+      
       {data.status && (
-        <button 
-          onClick={onViewLog}
-          className={`mt-2 text-xs w-full text-left flex items-center ${data.status === 'error' ? 'text-rose-400 hover:text-rose-300' : 'text-indigo-400 hover:text-indigo-300'}`}
-        >
-          <Icons.FileText className="w-3 h-3 mr-1" /> View Log
-        </button>
+        <div className="px-4 py-2 bg-black/20 border-t border-white/5">
+          <button 
+            onClick={onViewLog}
+            className={`text-[10px] w-full text-left flex items-center justify-between ${data.status === 'error' ? 'text-rose-400 hover:text-rose-300' : 'text-indigo-400 hover:text-indigo-300'}`}
+          >
+            <span className="flex items-center"><Icons.Terminal className="w-3 h-3 mr-1" /> View Execution Log</span>
+            <Icons.ChevronRight className="w-3 h-3" />
+          </button>
+        </div>
       )}
-      <Handle type="source" position={Position.Bottom} isConnectable={isConnectable} className="w-3 h-3 bg-slate-400 border-none" />
+      <Handle type="source" position={Position.Right} isConnectable={isConnectable} className="w-3 h-3 bg-slate-400 border-none -mr-1.5" />
     </motion.div>
   );
 };
@@ -245,38 +283,129 @@ const initialEdges = [
 ];
 
 const WORKFLOW_TEMPLATES = [
-  {
-    id: 'seo-content',
-    name: 'SEO Content Pipeline',
-    description: 'Automatically fetch keywords and generate a blog post.',
-    nodes: [
-      { id: 't1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', color: 'text-indigo-500', borderClass: 'border-indigo-500' }, position: { x: 250, y: 50 } },
-      { id: 't2', type: 'custom', data: { label: 'Fetch Keywords', iconName: 'Search', color: 'text-emerald-500', borderClass: 'border-emerald-500' }, position: { x: 250, y: 150 } },
-      { id: 't3', type: 'custom', data: { label: 'Generate Blog', iconName: 'PenTool', color: 'text-purple-500', borderClass: 'border-purple-500' }, position: { x: 250, y: 250 } },
-    ],
-    edges: [
-      { id: 'e1-2', source: 't1', target: 't2', animated: true, style: { stroke: '#6366f1' } },
-      { id: 'e2-3', source: 't2', target: 't3', animated: true, style: { stroke: '#6366f1' } },
-    ]
-  },
-  {
-    id: 'social-campaign',
-    name: 'Social Media Campaign',
-    description: 'Generate an image and post to multiple social networks.',
-    nodes: [
+  { id: 't1', name: 'Lead Enrichment Pipeline', description: 'Extract intent from email, enrich lead data via clearbit, check if high value.', nodes: [
+      { id: '1', type: 'custom', data: { label: 'New Email', type: 'trigger', iconName: 'Mail', color: 'text-indigo-500', borderClass: 'border-indigo-500', description: 'Trigger on form submit' }, position: { x: 50, y: 150 } },
+      { id: '2', type: 'custom', data: { label: 'Intent Extraction', type: 'ai analysis', iconName: 'BrainCircuit', color: 'text-fuchsia-500', borderClass: 'border-fuchsia-500', description: 'Extract goal' }, position: { x: 300, y: 150 } },
+      { id: '3', type: 'custom', data: { label: 'High Value?', type: 'logic', iconName: 'SplitSquareHorizontal', color: 'text-amber-500', borderClass: 'border-amber-500', description: 'Conditional routing' }, position: { x: 600, y: 150 } },
+      { id: '4', type: 'custom', data: { label: 'Manager Approval', type: 'human', iconName: 'CheckCircle', color: 'text-emerald-500', borderClass: 'border-emerald-500', description: 'Manual Message' }, position: { x: 600, y: 350 } },
+      { id: '5', type: 'custom', data: { label: 'Sync to Salesforce', type: 'crm', iconName: 'Database', color: 'text-sky-500', borderClass: 'border-sky-500', description: 'Update CRM' }, position: { x: 900, y: 150 } },
+    ], edges: [ { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#6366f1' } }, { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#fbbf24' } }, { id: 'e3-4', source: '3', target: '4', animated: true, style: { stroke: '#34d399' } }, { id: 'e3-5', source: '3', target: '5', animated: true, style: { stroke: '#38bdf8' } } ] },
+  { id: 'seo-content', name: 'SEO Content Pipeline', description: 'Automatically fetch keywords and generate a blog post.', nodes: [ { id: 't1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', color: 'text-indigo-500', borderClass: 'border-indigo-500' }, position: { x: 250, y: 50 } }, { id: 't2', type: 'custom', data: { label: 'Fetch Keywords', iconName: 'Search', color: 'text-emerald-500', borderClass: 'border-emerald-500' }, position: { x: 250, y: 150 } }, { id: 't3', type: 'custom', data: { label: 'Generate Blog', iconName: 'PenTool', color: 'text-purple-500', borderClass: 'border-purple-500' }, position: { x: 250, y: 250 } } ], edges: [ { id: 'e1-2', source: 't1', target: 't2', animated: true, style: { stroke: '#6366f1' } }, { id: 'e2-3', source: 't2', target: 't3', animated: true, style: { stroke: '#6366f1' } } ] },
+  { id: 'social-campaign', name: 'Social Media Campaign', description: 'Generate an image and post to multiple social networks.', nodes: [
       { id: 't1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', color: 'text-indigo-500', borderClass: 'border-indigo-500' }, position: { x: 250, y: 50 } },
       { id: 't2', type: 'custom', data: { label: 'Generate Image', iconName: 'Image', color: 'text-purple-500', borderClass: 'border-purple-500' }, position: { x: 250, y: 150 } },
-      { id: 't3', type: 'custom', data: { label: 'Post to Twitter', iconName: 'Twitter', color: 'text-sky-500', borderClass: 'border-sky-500' }, position: { x: 150, y: 250 } },
-      { id: 't4', type: 'custom', data: { label: 'Post to LinkedIn', iconName: 'Linkedin', color: 'text-blue-600', borderClass: 'border-blue-600' }, position: { x: 350, y: 250 } },
+      { id: 't3', type: 'custom', data: { label: 'Post to Instagram', iconName: 'Instagram', color: 'text-pink-500', borderClass: 'border-pink-500' }, position: { x: 150, y: 250 } },
+      { id: 't4', type: 'custom', data: { label: 'Post to WhatsApp', iconName: 'MessageCircle', color: 'text-emerald-500', borderClass: 'border-emerald-500' }, position: { x: 350, y: 250 } }
+    ], edges: [ { id: 'e1-2', source: 't1', target: 't2', animated: true, style: { stroke: '#6366f1' } }, { id: 'e2-3', source: 't2', target: 't3', animated: true, style: { stroke: '#6366f1' } }, { id: 'e2-4', source: 't2', target: 't4', animated: true, style: { stroke: '#6366f1' } } ] },
+  { id: 'abandoned-cart', name: 'Abandoned Cart Recovery', description: 'Detect abandoned cart, wait 1h, send discount email, track if purchased.', nodes: [ { id: 'c1', type: 'custom', data: { label: 'Cart Abandoned', iconName: 'ShoppingCart', color: 'text-indigo-500', borderClass: 'border-indigo-500' }, position: { x: 250, y: 50 } }, { id: 'c2', type: 'custom', data: { label: 'Wait 1 Hour', iconName: 'Clock', color: 'text-amber-500', borderClass: 'border-amber-500' }, position: { x: 250, y: 150 } }, { id: 'c3', type: 'custom', data: { label: 'Send Email', iconName: 'Send', color: 'text-red-400', borderClass: 'border-red-400' }, position: { x: 250, y: 250 } } ], edges: [ { id: 'c1-2', source: 'c1', target: 'c2', animated: true }, { id: 'c2-3', source: 'c2', target: 'c3', animated: true } ] },
+  { id: 'review-request', name: 'Review Request Sequence', description: 'After purchase, wait sequence, then request review.', nodes: [ { id: 'r1', type: 'custom', data: { label: 'Purchase Confirmed', iconName: 'CheckCircle', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } }, { id: 'r2', type: 'custom', data: { label: 'Wait 7 Days', iconName: 'Clock', borderClass: 'border-amber-500', color: 'text-amber-500' }, position: { x: 250, y: 150 } }, { id: 'r3', type: 'custom', data: { label: 'Send Email', iconName: 'Send', borderClass: 'border-red-400', color: 'text-red-400' }, position: { x: 250, y: 250 } } ], edges: [ { id: 'r1-2', source: 'r1', target: 'r2', animated: true }, { id: 'r2-3', source: 'r2', target: 'r3', animated: true } ] },
+  { id: 'webinar-registration', name: 'Webinar Registration', description: 'Add to CRM, tag attendee, send calendar invite.', nodes: [ { id: 'w1', type: 'custom', data: { label: 'Form Submission', iconName: 'FileText', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } }, { id: 'w2', type: 'custom', data: { label: 'Create Lead', iconName: 'UserPlus', borderClass: 'border-orange-500', color: 'text-orange-500' }, position: { x: 250, y: 150 } }, { id: 'w3', type: 'custom', data: { label: 'Send Email', iconName: 'Send', borderClass: 'border-red-400', color: 'text-red-400' }, position: { x: 250, y: 250 } } ], edges: [ { id: 'w1-2', source: 'w1', target: 'w2', animated: true }, { id: 'w2-3', source: 'w2', target: 'w3', animated: true } ] },
+  { id: 'customer-churn', name: 'Customer Churn Prediction', description: 'Analyze user data, calculate churn score, alert manager.', nodes: [ { id: 'u1', type: 'custom', data: { label: 'Fetch GA4 Data', iconName: 'BarChart3', borderClass: 'border-amber-500', color: 'text-amber-500' }, position: { x: 250, y: 50 } }, { id: 'u2', type: 'custom', data: { label: 'Predict Churn', iconName: 'Activity', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } }, { id: 'u3', type: 'custom', data: { label: 'Send Slack Alert', iconName: 'MessageSquare', borderClass: 'border-teal-500', color: 'text-teal-500' }, position: { x: 250, y: 250 } } ], edges: [ { id: 'u1-2', source: 'u1', target: 'u2', animated: true }, { id: 'u2-3', source: 'u2', target: 'u3', animated: true } ] },
+  { 
+    id: 'generated-0', name: 'Automated workflow 8', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
     ],
-    edges: [
-      { id: 'e1-2', source: 't1', target: 't2', animated: true, style: { stroke: '#6366f1' } },
-      { id: 'e2-3', source: 't2', target: 't3', animated: true, style: { stroke: '#6366f1' } },
-      { id: 'e2-4', source: 't2', target: 't4', animated: true, style: { stroke: '#6366f1' } },
-    ]
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-1', name: 'Automated workflow 9', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-2', name: 'Automated workflow 10', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-3', name: 'Automated workflow 11', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-4', name: 'Automated workflow 12', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-5', name: 'Automated workflow 13', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-6', name: 'Automated workflow 14', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-7', name: 'Automated workflow 15', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-8', name: 'Automated workflow 16', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-9', name: 'Automated workflow 17', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-10', name: 'Automated workflow 18', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-11', name: 'Automated workflow 19', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
+  },
+  { 
+    id: 'generated-12', name: 'Automated workflow 20', description: 'Automated real-time marketing sequence.', 
+    nodes: [ 
+       { id: 'g1', type: 'custom', data: { label: 'Schedule Trigger', iconName: 'Clock', borderClass: 'border-indigo-500', color: 'text-indigo-500' }, position: { x: 250, y: 50 } },
+       { id: 'g2', type: 'custom', data: { label: 'Extract Entities', iconName: 'Key', borderClass: 'border-fuchsia-500', color: 'text-fuchsia-500' }, position: { x: 250, y: 150 } } 
+    ],
+    edges: [ { id: 'g1-2', source: 'g1', target: 'g2', animated: true } ] 
   }
 ];
-
 let id = 3;
 const getId = () => `${id++}`;
 
@@ -315,14 +444,30 @@ const VariableInserter = ({ onInsert, upstreamNodes, dynamicVariables }: any) =>
 };
 
 export default function WorkflowBuilderWrapper() {
-  return (
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  
+  const content = (
     <ErrorBoundary>
-      <WorkflowBuilder />
+      <WorkflowBuilder isFullScreen={isFullScreen} toggleFullScreen={() => setIsFullScreen(!isFullScreen)} />
     </ErrorBoundary>
+  );
+
+  if (isFullScreen) {
+    return (
+      <div className="fixed inset-0 z-[100] bg-[#0A0D12] text-white flex flex-col font-sans overflow-hidden">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-full w-full flex flex-col bg-[#0A0D12] rounded-xl overflow-hidden text-white font-sans">
+      {content}
+    </div>
   );
 }
 
-function WorkflowBuilder() {
+function WorkflowBuilder({ isFullScreen, toggleFullScreen }: any) {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   
   // React Flow state hooks
@@ -341,6 +486,7 @@ function WorkflowBuilder() {
   const { sendNotification } = useNotifications();
   const [selectedLogNode, setSelectedLogNode] = useState<any | null>(null);
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const simulateJourney = async () => {
     if (nodes.length < 2) {
@@ -1046,58 +1192,91 @@ function WorkflowBuilder() {
         )}
       </AnimatePresence>
 
-      <div className="flex justify-between items-center mb-4 px-6 lg:px-8">
-        <div>
-          <h1 className="text-3xl font-bold text-theme-main tracking-tight">Workflow Builder</h1>
-          <p className="text-theme-muted mt-1">Drag and drop nodes to create autonomous marketing sequences.</p>
+      {/* Top Header - n8n style */}
+      <div className="flex justify-between items-center px-4 py-3 bg-[#0A0D12] border-b border-white/5 relative z-10 shadow-sm">
+        <div className="flex items-center space-x-4">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-white/90">Enterprise Outreach v4</span>
+            <span className="text-[10px] text-emerald-500 flex items-center mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Active
+            </span>
+          </div>
         </div>
-        <div className="flex space-x-3">
+        
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center bg-[#17181c] border border-white/10 rounded-full px-1 py-1">
+          <button className="p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-white/5"><Icons.ZoomOut className="w-3.5 h-3.5" /></button>
+          <span className="text-xs font-medium text-white px-3 w-16 text-center">100%</span>
+          <button className="p-1.5 text-slate-400 hover:text-white rounded-full hover:bg-white/5"><Icons.ZoomIn className="w-3.5 h-3.5" /></button>
+        </div>
+
+        <div className="flex space-x-2">
+          <button 
+            onClick={toggleFullScreen}
+            className="bg-[#17181c] border border-white/10 text-slate-300 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/5 hover:text-white transition-colors"
+            title="Toggle Fullscreen"
+          >
+            {isFullScreen ? <Icons.Minimize2 className="w-4 h-4" /> : <Icons.Maximize2 className="w-4 h-4" />}
+          </button>
           <button 
             onClick={() => setShowTemplatesModal(true)}
-            className="bg-theme-surface border border-white/10 text-theme-main px-4 py-2 rounded-lg hover:bg-white/5 transition-colors flex items-center"
+            className="bg-[#17181c] border border-white/10 text-slate-300 px-3 py-1.5 rounded-full hover:bg-white/5 hover:text-white transition-colors flex items-center text-xs font-medium"
           >
-            <Icons.LayoutTemplate className="w-4 h-4 mr-2" />
+            <Icons.LayoutTemplate className="w-3.5 h-3.5 mr-1.5" />
             Templates
           </button>
           <button 
             onClick={saveWorkflow}
-            className="bg-theme-surface border border-white/10 text-theme-main px-4 py-2 rounded-lg hover:bg-white/5 transition-colors flex items-center"
+            className="bg-[#17181c] border border-white/10 text-slate-300 px-3 py-1.5 rounded-full hover:bg-white/5 hover:text-white transition-colors flex items-center text-xs font-medium"
           >
-            <Icons.Save className="w-4 h-4 mr-2" />
-            Save Workflow
-          </button>
-          <button 
-            onClick={simulateJourney}
-            disabled={isSimulating || isExecuting}
-            className="bg-theme-surface border border-white/10 text-theme-main px-4 py-2 rounded-lg hover:bg-white/5 transition-colors flex items-center"
-          >
-            {isSimulating ? <Icons.Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Icons.Zap className="w-4 h-4 mr-2 text-amber-400" />}
-            {isSimulating ? 'Simulating...' : 'Simulate 10k Journeys'}
+            <Icons.Star className="w-3.5 h-3.5 mr-1.5" />
+            Deploy
           </button>
           <button 
             onClick={executeWorkflow}
             disabled={isExecuting}
-            className="bg-theme-primary hover:bg-theme-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg flex items-center transition-colors shadow-lg shadow-theme-primary/20"
+            className="bg-white hover:bg-slate-100 text-black px-4 py-1.5 rounded-full flex items-center transition-colors text-xs font-medium"
           >
-            {isExecuting ? <Icons.Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Icons.Play className="w-4 h-4 mr-2" />}
-            {isExecuting ? 'Executing...' : 'Execute Workflow'}
+            {isExecuting ? <Icons.Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Icons.Play className="w-3.5 h-3.5 mr-1.5" />}
+            {isExecuting ? 'Running...' : 'Play'}
           </button>
         </div>
       </div>
       
-      <div className="flex-1 flex overflow-hidden border-t border-white/10">
+      <div className="flex-1 flex overflow-hidden bg-[#0A0D12]">
+        {/* Add Node Button if closed */}
+        {!showSidebar && (
+          <div className="absolute bottom-6 left-6 z-20">
+            <button 
+              onClick={() => setShowSidebar(true)}
+              className="bg-[#17181c] border border-white/10 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-white/5 transition-colors"
+            >
+              <Icons.Plus className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+        
         {/* Sidebar for Nodes */}
-        <div className="w-64 bg-theme-surface border-r border-white/10 flex flex-col h-full z-20">
+        {showSidebar && (
+        <div className="w-64 bg-[#121419]/95 backdrop-blur-xl border-r border-white/10 flex flex-col h-full z-20 absolute left-0 top-0 lg:relative">
           <div className="p-4 border-b border-white/10">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold text-theme-main">Node Library</h3>
-              <button 
-                onClick={() => setShowCustomNodeModal(true)}
-                className="p-1 hover:bg-white/10 rounded text-slate-400 hover:text-white transition-colors"
-                title="Create Custom Node"
-              >
-                <Icons.Plus className="w-4 h-4" />
-              </button>
+              <h3 className="font-semibold text-white">Nodes</h3>
+              <div className="flex space-x-1">
+                <button 
+                  onClick={() => setShowCustomNodeModal(true)}
+                  className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
+                  title="Create Custom Node"
+                >
+                  <Icons.Plus className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={() => setShowSidebar(false)}
+                  className="p-1.5 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors"
+                  title="Close Library"
+                >
+                  <Icons.X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <div className="mb-3 relative">
               <Icons.Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1144,6 +1323,7 @@ function WorkflowBuilder() {
             })}
           </div>
         </div>
+        )}
 
         {/* Canvas */}
         <div 
@@ -1213,202 +1393,140 @@ function WorkflowBuilder() {
             <Background variant={BackgroundVariant.Dots} gap={12} size={1} color="#334155" />
           </ReactFlow>
         </div>
-        
-        {/* Configuration Panel */}
+              {/* Configuration Panel - n8n style */}
         <AnimatePresence>
           {selectedNode && (
             <motion.div 
-              initial={{ x: 300, opacity: 0 }}
+              initial={{ x: 400, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 300, opacity: 0 }}
+              exit={{ x: 400, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-80 bg-slate-900 border-l border-white/10 flex flex-col h-full z-20 absolute right-0 top-0 shadow-2xl"
+              className="w-[340px] bg-[#121419]/95 backdrop-blur-xl border border-[rgba(255,255,255,0.08)] flex flex-col z-50 absolute right-6 top-20 shadow-2xl rounded-3xl overflow-hidden h-[calc(100%-100px)]"
             >
-              <div className="p-4 border-b border-white/10 flex justify-between items-center bg-slate-800/50">
-                <h3 className="font-semibold text-white flex items-center">
-                  <Icons.Settings className="w-4 h-4 mr-2 text-indigo-400" />
-                  Configure Node
-                </h3>
-                <button onClick={() => setSelectedNode(null)} className="text-slate-400 hover:text-white transition-colors">
-                  <Icons.X className="w-4 h-4" />
+              <div className="px-5 py-4 flex items-center justify-between">
+                <div className="flex items-center text-slate-400 hover:text-white cursor-pointer transition-colors" onClick={() => setSelectedNode(null)}>
+                  <Icons.ArrowLeft className="w-4 h-4 mr-2" />
+                  <h3 className="text-sm font-medium">Node Settings</h3>
+                </div>
+                <button className="text-slate-400 hover:text-white transition-colors">
+                  <Icons.MoreVertical className="w-4 h-4" />
                 </button>
               </div>
-              <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
-                <div className="mb-6">
-                  <h4 className="text-lg font-medium text-white mb-1">{selectedNode.data.label}</h4>
-                  <p className="text-xs text-slate-400">{selectedNode.data.description || 'Configure parameters for this node.'}</p>
+              
+              <div className="px-5 overflow-y-auto custom-scrollbar flex-1 pb-6 space-y-5">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1 select-none">Node Title</label>
+                  <input 
+                    type="text" 
+                    value={selectedNode.data.label}
+                    onChange={e => {
+                      const newLabel = e.target.value;
+                      setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, label: newLabel } } : n));
+                      setSelectedNode((prev: any) => ({ ...prev, data: { ...prev.data, label: newLabel } }));
+                    }}
+                    className="w-full bg-[#1A1C23] border border-sky-500/30 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-sky-500 text-sm transition-colors shadow-[0_0_10px_rgba(14,165,233,0.1)] focus:shadow-[0_0_15px_rgba(14,165,233,0.2)]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1 select-none">Description</label>
+                  <textarea 
+                    value={selectedNode.data.description || ''}
+                    onChange={e => {
+                      const desc = e.target.value;
+                      setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, description: desc } } : n));
+                      setSelectedNode((prev: any) => ({ ...prev, data: { ...prev.data, description: desc } }));
+                    }}
+                    className="w-full bg-[#1A1C23] border border-white/5 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-white/10 h-20 resize-none text-sm transition-colors"
+                    placeholder="Enter node description..."
+                  />
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-slate-300 mb-1">Node Label</label>
-                    <input 
-                      type="text" 
-                      value={selectedNode.data.label}
+                <div className="border-t border-white/5 pt-5">
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1 select-none">Node Type</label>
+                  <div className="relative">
+                    <select 
+                      value={selectedNode.data.type || 'AI'}
                       onChange={e => {
-                        const newLabel = e.target.value;
-                        setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, label: newLabel } } : n));
-                        setSelectedNode((prev: any) => ({ ...prev, data: { ...prev.data, label: newLabel } }));
+                        const t = e.target.value;
+                        setNodes(nds => nds.map(n => n.id === selectedNode.id ? { ...n, data: { ...n.data, type: t } } : n));
+                        setSelectedNode((prev: any) => ({ ...prev, data: { ...prev.data, type: t } }));
                       }}
-                      className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                    />
+                      className="w-full appearance-none bg-[#1A1C23] border border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-slate-200 focus:outline-none focus:border-white/10 text-sm transition-colors"
+                    >
+                      <option value="AI">AI</option>
+                      <option value="Logic">Logic</option>
+                      <option value="Human">Human</option>
+                      <option value="Trigger">Trigger</option>
+                      <option value="Action">Action</option>
+                    </select>
+                    <Icons.BrainCircuit className="w-4 h-4 text-rose-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Icons.ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
-                  {selectedNode.data.label === 'Fetch Keywords' && (
-                    <div>
-                      <div className="flex justify-between items-center mb-1 group relative">
-                        <label className="block text-sm font-medium text-slate-300">Topic</label>
-                        <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                        <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                          Enter the topic to fetch keywords for. You can insert dynamic variables (e.g., {'{{projectName}}'}) or upstream outputs.
-                        </div>
-                        <VariableInserter 
-                          onInsert={(v: string) => insertVariable('topic', v)} 
-                          upstreamNodes={upstreamNodes} 
-                          dynamicVariables={dynamicVariables} 
-                        />
-                      </div>
-                      <input 
-                        type="text" 
-                        value={selectedNode.data.config?.topic || ''}
-                        onChange={e => updateNodeConfig('topic', e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                        placeholder="e.g., digital marketing"
-                      />
-                    </div>
-                  )}
-                  
-                  {selectedNode.data.label === 'Generate Blog' && (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-1 group relative">
-                          <label className="block text-sm font-medium text-slate-300">Topic / Instructions</label>
-                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                            Provide the topic or instructions to generate the blog. You can use dynamic variables here.
-                          </div>
-                          <VariableInserter 
-                            onInsert={(v: string) => insertVariable('topic', v)} 
-                            upstreamNodes={upstreamNodes} 
-                            dynamicVariables={dynamicVariables} 
-                          />
-                        </div>
-                        <textarea 
-                          value={selectedNode.data.config?.topic || ''}
-                          onChange={e => updateNodeConfig('topic', e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 h-20 resize-none text-sm"
-                          placeholder="What should the blog be about?"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1 group relative flex items-center">
-                          Tone
-                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                            Select the stylistic tone for the generated blog post.
-                          </div>
-                        </label>
-                        <select 
-                          value={selectedNode.data.config?.tone || 'professional'}
-                          onChange={e => updateNodeConfig('tone', e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                        >
-                          <option value="professional">Professional</option>
-                          <option value="casual">Casual</option>
-                          <option value="humorous">Humorous</option>
-                          <option value="informative">Informative</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {selectedNode.data.label === 'Send Email' && (
-                    <>
-                      <div>
-                        <div className="flex justify-between items-center mb-1 group relative">
-                          <label className="block text-sm font-medium text-slate-300">Recipient</label>
-                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                            Email address of the recipient. Insert variables to send to dynamic recipients.
-                          </div>
-                          <VariableInserter 
-                            onInsert={(v: string) => insertVariable('recipient', v)} 
-                            upstreamNodes={upstreamNodes} 
-                            dynamicVariables={dynamicVariables} 
-                          />
-                        </div>
-                        <input 
-                          type="email" 
-                          value={selectedNode.data.config?.recipient || ''}
-                          onChange={e => updateNodeConfig('recipient', e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                          placeholder="user@example.com"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-1 group relative">
-                          <label className="block text-sm font-medium text-slate-300">Subject</label>
-                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                          <div className="absolute top-0 right-32 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                            Subject line for the email. Dynamic variables are supported.
-                          </div>
-                          <VariableInserter 
-                            onInsert={(v: string) => insertVariable('subject', v)} 
-                            upstreamNodes={upstreamNodes} 
-                            dynamicVariables={dynamicVariables} 
-                          />
-                        </div>
-                        <input 
-                          type="text" 
-                          value={selectedNode.data.config?.subject || ''}
-                          onChange={e => updateNodeConfig('subject', e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                          placeholder="Email Subject"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-1 group relative">
-                          <label className="block text-sm font-medium text-slate-300">Body</label>
-                          <Icons.Info className="w-3 h-3 text-slate-500 ml-1 cursor-help" />
-                          <div className="absolute bottom-6 right-0 hidden group-hover:block bg-slate-800 text-xs text-slate-200 p-2 rounded shadow-lg border border-white/10 w-48 z-50">
-                            Contents of the email. You can insert variables directly into the body.
-                          </div>
-                          <VariableInserter 
-                            onInsert={(v: string) => insertVariable('body', v)} 
-                            upstreamNodes={upstreamNodes} 
-                            dynamicVariables={dynamicVariables} 
-                          />
-                        </div>
-                        <textarea 
-                          value={selectedNode.data.config?.body || ''}
-                          onChange={e => updateNodeConfig('body', e.target.value)}
-                          className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 h-24 resize-none text-sm"
-                          placeholder="Email content..."
-                        />
-                      </div>
-                    </>
-                  )}
-                  
-                  {/* Generic configuration for other nodes or custom nodes */}
-                  {selectedNode.data.label !== 'Fetch Keywords' && selectedNode.data.label !== 'Generate Blog' && selectedNode.data.label !== 'Send Email' && (
-                    <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="block text-sm font-medium text-slate-300">Custom Parameter</label>
-                        <VariableInserter 
-                          onInsert={(v: string) => insertVariable('customParam', v)} 
-                          upstreamNodes={upstreamNodes} 
-                          dynamicVariables={dynamicVariables} 
-                        />
-                      </div>
-                      <input 
-                        type="text" 
-                        value={selectedNode.data.config?.customParam || ''}
-                        onChange={e => updateNodeConfig('customParam', e.target.value)}
-                        className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-indigo-500 text-sm"
-                        placeholder="Enter value..."
-                      />
-                    </div>
-                  )}
                 </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1 select-none">AI Model</label>
+                  <div className="w-full bg-[#1A1C23] border border-white/5 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-white/10 transition-colors">
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded bg-emerald-500/10 flex items-center justify-center mr-3">
+                         <Icons.Bot className="w-4 h-4 text-emerald-500" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-slate-200">{selectedNode.data.config?.model || 'GPT-4o'}</div>
+                        <div className="text-[10px] text-emerald-500 flex items-center">
+                          <span className="w-5 h-2 inline-flex items-center">API</span> Connected
+                        </div>
+                      </div>
+                    </div>
+                    <Icons.ChevronsUpDown className="w-4 h-4 text-slate-500" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5 ml-1 select-none">System Prompt</label>
+                  <textarea 
+                    value={selectedNode.data.config?.prompt || 'Extract lead intent... Output JSON.'}
+                    onChange={e => updateNodeConfig('prompt', e.target.value)}
+                    className="w-full bg-[#1A1C23] border border-white/5 rounded-xl px-4 py-2.5 text-slate-300 focus:outline-none focus:border-white/10 h-28 resize-none text-sm transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-2 ml-1 select-none">Output type</label>
+                  <div className="flex bg-[#1A1C23] rounded-xl p-1 border border-white/5">
+                    {['Document', 'Image', 'Text', 'JSON'].map((type) => (
+                      <button 
+                        key={type}
+                        onClick={() => updateNodeConfig('outputType', type)}
+                        className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                          (selectedNode.data.config?.outputType || 'JSON') === type 
+                            ? 'bg-white/10 text-white' 
+                            : 'text-slate-400 hover:text-slate-300'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Dynamically insert VariableInserter if needed, omitted to keep minimalist look for now */}
+              </div>
+
+              <div className="p-5 flex space-x-3 bg-[#0A0D12]">
+                <button 
+                  className="flex-1 py-2.5 bg-[#1A1C23] border border-white/5 text-slate-300 rounded-xl hover:bg-white/5 transition-colors flex items-center justify-center text-sm font-medium"
+                >
+                  <Icons.Play className="w-4 h-4 mr-2" />
+                  Test
+                </button>
+                <button 
+                  className="flex-1 py-2.5 bg-white text-black hover:bg-slate-100 rounded-xl transition-colors flex items-center justify-center text-sm font-medium"
+                >
+                  <Icons.Save className="w-4 h-4 mr-2" />
+                  Save
+                </button>
               </div>
             </motion.div>
           )}
