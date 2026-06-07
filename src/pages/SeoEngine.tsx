@@ -7,6 +7,7 @@ import { useProjects } from '../context/ProjectContext';
 import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useNotifications } from '../context/NotificationContext';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -22,6 +23,7 @@ const DEFAULT_DYNAMIC_VARIABLES = [
 export default function SeoEngine() {
   const { user, isAuthReady } = useAuth();
   const { activeProject } = useProjects();
+  const { sendNotification } = useNotifications();
   const [keywords, setKeywords] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [competitorDomain, setCompetitorDomain] = useState('');
@@ -162,7 +164,7 @@ export default function SeoEngine() {
 
   const addSuggestionToStrategy = (suggestion: string) => {
     if (strategies.length === 0) {
-      alert("Please create a strategy first.");
+      sendNotification("Action Required", "Please create a strategy first.", "warning", "seo");
       return;
     }
     // Add to the first strategy for simplicity, or could prompt user
@@ -237,7 +239,7 @@ export default function SeoEngine() {
     
     // Check if it already exists in local state to prevent duplicates
     if (dynamicVariables.find((v: any) => v.key === formattedKey)) {
-      alert("Variable key already exists.");
+      sendNotification("Duplicate detected", "Variable key already exists.", "warning", "seo");
       return;
     }
 
@@ -261,7 +263,7 @@ export default function SeoEngine() {
     
     // Don't allow deleting default variables if they aren't in Firestore yet
     if (!id) {
-      alert("Cannot delete default variables until you save custom ones.");
+      sendNotification("Action Denied", "Cannot delete default variables until you save custom ones.", "warning", "seo");
       return;
     }
 

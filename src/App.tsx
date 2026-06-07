@@ -3,26 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider } from './context/ThemeContext';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ProjectProvider } from './context/ProjectContext';
-import { NotificationProvider } from './context/NotificationContext';
-import Layout from './components/Layout';
-import Hero from './pages/Hero';
-import Dashboard from './pages/Dashboard';
-import SeoEngine from './pages/SeoEngine';
-import ContentGen from './pages/ContentGen';
-import SocialMedia from './pages/SocialMedia';
-import Analytics from './pages/Analytics';
-import Performance from './pages/Performance';
-import Automation from './pages/Automation';
-import Settings from './pages/Settings';
-import Workflow from './pages/Workflow';
-import AI from './pages/AI';
-import Magic from './pages/Magic';
-import Onboarding from './pages/Onboarding';
-import AuthPage from './pages/AuthPage';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { ProjectProvider } from "./context/ProjectContext";
+import { NotificationProvider } from "./context/NotificationContext";
+import { TriMatrixProvider } from "./context/TriMatrixContext";
+import Layout from "./components/Layout";
+import Hero from "./pages/Hero";
+import Dashboard from "./pages/Dashboard";
+import SeoEngine from "./pages/SeoEngine";
+import ContentGen from "./pages/ContentGen";
+import SocialMedia from "./pages/SocialMedia";
+import Analytics from "./pages/Analytics";
+import Performance from "./pages/Performance";
+import Automation from "./pages/Automation";
+import Settings from "./pages/Settings";
+import Workflow from "./pages/Workflow";
+import AI from "./pages/AI";
+import Magic from "./pages/Magic";
+import Onboarding from "./pages/Onboarding";
+import AuthPage from "./pages/AuthPage";
+import Intel from "./pages/Intel";
 
 // A wrapper to handle authentication state
 function AppRoutes() {
@@ -56,6 +58,7 @@ function AppRoutes() {
         <Route path="onboarding" element={<Onboarding />} />
         <Route path="settings" element={<Settings />} />
         <Route path="workflow" element={<Workflow />} />
+        <Route path="intel" element={<Intel />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
@@ -68,9 +71,11 @@ export default function App() {
       <AuthProvider>
         <ProjectProvider>
           <NotificationProvider>
-            <ThemeProvider>
-              <AppRoutes />
-            </ThemeProvider>
+            <TriMatrixProvider>
+              <ThemeProvider>
+                <AppRoutes />
+              </ThemeProvider>
+            </TriMatrixProvider>
           </NotificationProvider>
         </ProjectProvider>
       </AuthProvider>

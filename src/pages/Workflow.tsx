@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from '@google/genai';
 import { useAuth } from '../context/AuthContext';
 import { useProjects } from '../context/ProjectContext';
+import { useNotifications } from '../context/NotificationContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
@@ -337,12 +338,13 @@ function WorkflowBuilder() {
   const [simulationData, setSimulationData] = useState<any>(null);
   const [executionResult, setExecutionResult] = useState<{status: 'success' | 'error', message: string} | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const { sendNotification } = useNotifications();
   const [selectedLogNode, setSelectedLogNode] = useState<any | null>(null);
   const [selectedNode, setSelectedNode] = useState<any | null>(null);
 
   const simulateJourney = async () => {
     if (nodes.length < 2) {
-      alert("Please add at least a trigger and one action node to simulate.");
+      sendNotification("Simulation Warning", "Please add at least a trigger and one action node to simulate.", "warning", "system");
       return;
     }
     setIsSimulating(true);
